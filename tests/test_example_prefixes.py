@@ -1,191 +1,90 @@
-"""Tests for example_prefixes.py"""
+"""Parametrized tests for example_prefixes.py"""
+
+import pytest
+
+from tests.test_helpers import level_0, level_1, level_2, verify_output
+
+PREFIXES_EXPECTATIONS = [
+    level_0(
+        'Processing dataset',
+        'records: 1000',
+        'pkg[ruff-format]',
+        'ruff format --line-length=80 .',
+        'pkg[pytest]',
+        'pytest tests/ -v',
+        'Database query completed',
+        'duration: 150ms',
+        'rows_affected: 42',
+        'python setup.py build',
+        'Summary',
+        'verbosity level: 0',
+        should_not_contain=[
+            '_verbose_source',
+            'source:',
+            'format:',
+            '_debug_file_size',
+            'file_size:',
+            'query:',
+            'connection:',
+            'query_plan:',
+        ],
+        desc='base context shown, verbose/debug prefixes filtered at level 0',
+    ),
+    level_1(
+        'Processing dataset',
+        'records: 1000',
+        'source: data.csv',
+        'format: CSV',
+        'pkg[ruff-format]',
+        'files_changed: 14',
+        'pkg[pytest]',
+        'tests_passed: 95',
+        'tests_failed: 5',
+        'Database query completed',
+        'duration: 150ms',
+        'query: SELECT * FROM users',
+        'connection: localhost:5432',
+        'verbosity level: 1',
+        should_not_contain=[
+            'file_size:',
+            'encoding:',
+            'config:',
+            'query_plan:',
+            'cache_hit:',
+        ],
+        desc='verbose prefixes visible, debug hidden at level 1',
+    ),
+    level_2(
+        'Processing dataset',
+        'records: 1000',
+        'source: data.csv',
+        'format: CSV',
+        'file_size: 2.5MB',
+        'encoding: utf-8',
+        'pkg[ruff-format]',
+        'files_changed: 14',
+        'config: .ruff.toml',
+        'pkg[pytest]',
+        'tests_passed: 95',
+        'tests_failed: 5',
+        'duration: 5.2s',
+        'Database query completed',
+        'query: SELECT * FROM users',
+        'connection: localhost:5432',
+        'query_plan: Sequential Scan',
+        'cache_hit: true',
+        'verbosity level: 2',
+        desc='all prefixes including debug visible at level 2',
+    ),
+]
 
 
-# ============================================================
-# Level 0 Tests (Default)
-# ============================================================
-
-
-def test_basic_prefix_filtering_level_0(run_example_prefixes):
-    """Test that _verbose_ and _debug_ prefixes are filtered at level 0"""
-    result = run_example_prefixes([])
-    
-    # Base context should appear
-    assert "Processing dataset" in result.stdout
-    assert "records: 1000" in result.stdout
-    
-    # Verbose context should NOT appear
-    assert "_verbose_source" not in result.stdout
-    assert "source:" not in result.stdout
-    assert "format:" not in result.stdout
-    
-    # Debug context should NOT appear
-    assert "_debug_file_size" not in result.stdout
-    assert "file_size:" not in result.stdout
-
-
-def test_tool_execution_formatting_level_0(run_example_prefixes):
-    """Test that tool execution uses custom 'pkg' prefix at level 0"""
-    result = run_example_prefixes([])
-    
-    # Should show tool execution with custom prefix
-    assert "pkg[ruff-format]" in result.stdout
-    assert "ruff format --line-length=80 ." in result.stdout
-    
-    assert "pkg[pytest]" in result.stdout
-    assert "pytest tests/ -v" in result.stdout
-    
-    # Verbose/debug context should not appear
-    assert "_verbose_files_changed" not in result.stdout
-    assert "_debug_config" not in result.stdout
-
-
-def test_database_query_level_0(run_example_prefixes):
-    """Test database query formatting at level 0"""
-    result = run_example_prefixes([])
-    
-    # Base context shown
-    assert "Database query completed" in result.stdout
-    assert "duration: 150ms" in result.stdout
-    assert "rows_affected: 42" in result.stdout
-    
-    # Verbose/debug context hidden
-    assert "query:" not in result.stdout
-    assert "connection:" not in result.stdout
-    assert "query_plan:" not in result.stdout
-
-
-# ============================================================
-# Level 1 Tests (-v)
-# ============================================================
-
-
-def test_verbose_prefix_visible_at_level_1(run_example_prefixes):
-    """Test that _verbose_ prefixed context is visible at level 1"""
-    result = run_example_prefixes(["-v"])
-    
-    # Base context
-    assert "Processing dataset" in result.stdout
-    assert "records: 1000" in result.stdout
-    
-    # Verbose context should appear
-    assert "source: data.csv" in result.stdout
-    assert "format: CSV" in result.stdout
-    
-    # Debug context should NOT appear
-    assert "file_size:" not in result.stdout
-    assert "encoding:" not in result.stdout
-
-
-def test_tool_verbose_context_level_1(run_example_prefixes):
-    """Test that tool execution shows verbose context at level 1"""
-    result = run_example_prefixes(["-v"])
-    
-    # Tool execution with verbose details
-    assert "pkg[ruff-format]" in result.stdout
-    assert "files_changed: 14" in result.stdout
-    
-    assert "pkg[pytest]" in result.stdout
-    assert "tests_passed: 95" in result.stdout
-    assert "tests_failed: 5" in result.stdout
-    
-    # Debug details should not appear
-    assert "config:" not in result.stdout
-    assert "duration:" not in result.stdout or "duration: 150ms" in result.stdout  # duration is base context in query example
-
-
-def test_database_query_level_1(run_example_prefixes):
-    """Test database query shows verbose context at level 1"""
-    result = run_example_prefixes(["-v"])
-    
-    # Base and verbose context
-    assert "Database query completed" in result.stdout
-    assert "duration: 150ms" in result.stdout
-    assert "query: SELECT * FROM users" in result.stdout
-    assert "connection: localhost:5432" in result.stdout
-    
-    # Debug context hidden
-    assert "query_plan:" not in result.stdout
-    assert "cache_hit:" not in result.stdout
-
-
-# ============================================================
-# Level 2 Tests (-vv)
-# ============================================================
-
-
-def test_debug_prefix_visible_at_level_2(run_example_prefixes):
-    """Test that _debug_ prefixed context is visible at level 2"""
-    result = run_example_prefixes(["-v", "-v"])
-    
-    # All context should appear
-    assert "Processing dataset" in result.stdout
-    assert "records: 1000" in result.stdout
-    assert "source: data.csv" in result.stdout
-    assert "format: CSV" in result.stdout
-    assert "file_size: 2.5MB" in result.stdout
-    assert "encoding: utf-8" in result.stdout
-
-
-def test_tool_debug_context_level_2(run_example_prefixes):
-    """Test that tool execution shows debug context at level 2"""
-    result = run_example_prefixes(["-v", "-v"])
-    
-    # Tool execution with all details
-    assert "pkg[ruff-format]" in result.stdout
-    assert "files_changed: 14" in result.stdout
-    assert "config: .ruff.toml" in result.stdout
-    
-    assert "pkg[pytest]" in result.stdout
-    assert "tests_passed: 95" in result.stdout
-    assert "tests_failed: 5" in result.stdout
-    assert "duration: 5.2s" in result.stdout
-
-
-def test_database_query_level_2(run_example_prefixes):
-    """Test database query shows debug context at level 2"""
-    result = run_example_prefixes(["-v", "-v"])
-    
-    # All context visible
-    assert "Database query completed" in result.stdout
-    assert "query: SELECT * FROM users" in result.stdout
-    assert "connection: localhost:5432" in result.stdout
-    assert "query_plan: Sequential Scan" in result.stdout
-    assert "cache_hit: true" in result.stdout
-
-
-# ============================================================
-# General Behavior Tests
-# ============================================================
-
-
-def test_custom_prefix_in_summary(run_example_prefixes):
-    """Test that summary mentions custom 'pkg' prefix"""
-    result = run_example_prefixes([])
-    
-    assert result.returncode == 0
-    assert "Summary" in result.stdout
-    assert "pkg" in result.stdout.lower()
-
-
-def test_tool_execution_without_tool_name(run_example_prefixes):
-    """Test tool execution works without explicit tool name"""
-    result = run_example_prefixes([])
-    
-    # Should still show the command even without tool name
-    assert "python setup.py build" in result.stdout
-
-
-def test_all_verbosity_levels_complete(run_example_prefixes):
-    """Test that example completes at all verbosity levels"""
-    result_0 = run_example_prefixes([])
-    result_1 = run_example_prefixes(["-v"])
-    result_2 = run_example_prefixes(["-v", "-v"])
-    
-    assert result_0.returncode == 0
-    assert result_1.returncode == 0
-    assert result_2.returncode == 0
-    
-    assert "verbosity level: 0" in result_0.stdout
-    assert "verbosity level: 1" in result_1.stdout
-    assert "verbosity level: 2" in result_2.stdout
+@pytest.mark.parametrize(
+    'expectation',
+    PREFIXES_EXPECTATIONS,
+    ids=lambda e: e.description,
+)
+def test_prefixes_output(run_example_prefixes, expectation):
+    """Test example_prefixes output at different verbosity levels."""
+    result = run_example_prefixes(expectation.args)
+    verify_output(result, expectation)

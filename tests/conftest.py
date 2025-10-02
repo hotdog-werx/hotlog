@@ -1,5 +1,4 @@
-"""
-Pytest configuration and shared fixtures for hotlog tests.
+"""Pytest configuration and shared fixtures for hotlog tests.
 
 Provides utilities for capturing and asserting CLI output without mocking.
 """
@@ -19,9 +18,9 @@ from pytest_mock import MockerFixture
 def strip_ansi(text: str) -> str:
     """Remove ANSI color codes and Rich formatting from text."""
     # Remove ANSI escape sequences
-    text = re.sub(r"\x1b\[[0-9;]*m", "", text)
+    text = re.sub(r'\x1b\[[0-9;]*m', '', text)
     # Remove Rich markup tags like [bold], [/bold], [blue], etc.
-    text = re.sub(r"\[/?[a-z#0-9 ]+\]", "", text)
+    text = re.sub(r'\[/?[a-z#0-9 ]+\]', '', text)
     return text
 
 
@@ -35,7 +34,7 @@ class Result(BaseModel):
     @property
     def output(self) -> str:
         """Combined stdout and stderr for unified output checking."""
-        return (self.stdout or "") + (self.stderr or "")
+        return (self.stdout or '') + (self.stderr or '')
 
     @property
     def clean_output(self) -> str:
@@ -56,19 +55,18 @@ class RunExampleContext:
 
 
 def _run_example(ctx: RunExampleContext) -> Result:
-    """
-    Execute an example's main function with captured output.
+    """Execute an example's main function with captured output.
 
     This runs the actual code without mocking to stress test the library.
     """
     old_cwd = Path.cwd()
     old_argv = sys.argv.copy()
-    old_env = os.environ.get("HOTLOG_NO_DELAY")
+    old_env = os.environ.get('HOTLOG_NO_DELAY')
 
     try:
         # Set environment variable to skip time.sleep() in examples
-        os.environ["HOTLOG_NO_DELAY"] = "1"
-        
+        os.environ['HOTLOG_NO_DELAY'] = '1'
+
         os.chdir(ctx.cwd)
         sys.argv = [ctx.example_name, *ctx.args]
 
@@ -93,9 +91,9 @@ def _run_example(ctx: RunExampleContext) -> Result:
         sys.argv = old_argv
         # Restore old environment variable
         if old_env is None:
-            os.environ.pop("HOTLOG_NO_DELAY", None)
+            os.environ.pop('HOTLOG_NO_DELAY', None)
         else:
-            os.environ["HOTLOG_NO_DELAY"] = old_env
+            os.environ['HOTLOG_NO_DELAY'] = old_env
 
 
 # Type alias for example runner functions
@@ -108,8 +106,7 @@ def run_example_cli(
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> ExampleRunner:
-    """
-    Fixture to run example_cli.py with captured output.
+    """Fixture to run example_cli.py with captured output.
 
     Usage:
         result = run_example_cli(["install", "mypackage"])
@@ -119,7 +116,7 @@ def run_example_cli(
 
     def _run(args: list[str]) -> Result:
         ctx = RunExampleContext(
-            example_name="example_cli.py",
+            example_name='example_cli.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -137,19 +134,19 @@ def run_example_toolbelt(
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> ExampleRunner:
-    """
-    Fixture to run example_toolbelt.py with captured output.
+    """Fixture to run example_toolbelt.py with captured output.
 
     Usage:
         result = run_example_toolbelt(["-v"])
         assert "tb[ruff-format-80]" in result.clean_output
     """
+
     # Import will be dynamic since we need to handle different verbosity levels
     def _run(args: list[str]) -> Result:
         from examples.example_toolbelt import main
 
         ctx = RunExampleContext(
-            example_name="example_toolbelt.py",
+            example_name='example_toolbelt.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -173,7 +170,7 @@ def run_example_custom_matcher(
         from examples.example_custom_matcher import main
 
         ctx = RunExampleContext(
-            example_name="example_custom_matcher.py",
+            example_name='example_custom_matcher.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -197,7 +194,7 @@ def run_example_highlight(
         from examples.example_highlight import main
 
         ctx = RunExampleContext(
-            example_name="example_highlight.py",
+            example_name='example_highlight.py',
             main_func=main,
             args=args or [],
             cwd=tmp_path,
@@ -221,7 +218,7 @@ def run_example_live(
         from examples.example_live import main
 
         ctx = RunExampleContext(
-            example_name="example_live.py",
+            example_name='example_live.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -245,7 +242,7 @@ def run_example_prefixes(
         from examples.example_prefixes import main
 
         ctx = RunExampleContext(
-            example_name="example_prefixes.py",
+            example_name='example_prefixes.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -269,7 +266,7 @@ def run_example_usage(
         from examples.example_usage import main
 
         ctx = RunExampleContext(
-            example_name="example_usage.py",
+            example_name='example_usage.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -293,7 +290,7 @@ def run_example_quickstart(
         from examples.example_quickstart import main
 
         ctx = RunExampleContext(
-            example_name="example_quickstart.py",
+            example_name='example_quickstart.py',
             main_func=main,
             args=args,
             cwd=tmp_path,
@@ -308,9 +305,8 @@ def run_example_quickstart(
 # Helper assertion functions
 
 
-def assert_contains_all(output: str, snippets: list[str], context: str = ""):
-    """
-    Assert that all snippets appear in the output.
+def assert_contains_all(output: str, snippets: list[str], context: str = ''):
+    """Assert that all snippets appear in the output.
 
     Args:
         output: The text to search in
@@ -319,17 +315,18 @@ def assert_contains_all(output: str, snippets: list[str], context: str = ""):
     """
     missing = [s for s in snippets if s not in output]
     if missing:
-        ctx = f" in {context}" if context else ""
+        ctx = f' in {context}' if context else ''
         pytest.fail(
-            f"Missing expected snippet(s){ctx}:\n"
-            f"  Missing: {missing}\n\n"
-            f"Actual output:\n{output}"
+            f'Missing expected snippet(s){ctx}:\n  Missing: {missing}\n\nActual output:\n{output}',
         )
 
 
-def assert_not_contains_any(output: str, snippets: list[str], context: str = ""):
-    """
-    Assert that none of the snippets appear in the output.
+def assert_not_contains_any(
+    output: str,
+    snippets: list[str],
+    context: str = '',
+):
+    """Assert that none of the snippets appear in the output.
 
     Args:
         output: The text to search in
@@ -338,11 +335,9 @@ def assert_not_contains_any(output: str, snippets: list[str], context: str = "")
     """
     found = [s for s in snippets if s in output]
     if found:
-        ctx = f" in {context}" if context else ""
+        ctx = f' in {context}' if context else ''
         pytest.fail(
-            f"Found unexpected snippet(s){ctx}:\n"
-            f"  Found: {found}\n\n"
-            f"Actual output:\n{output}"
+            f'Found unexpected snippet(s){ctx}:\n  Found: {found}\n\nActual output:\n{output}',
         )
 
 
@@ -353,8 +348,7 @@ def assert_output_matches_verbosity(
     verbose_only: list[str] | None = None,
     debug_only: list[str] | None = None,
 ):
-    """
-    Assert output matches expected verbosity level filtering.
+    """Assert output matches expected verbosity level filtering.
 
     Args:
         output: The captured output to check
@@ -367,18 +361,30 @@ def assert_output_matches_verbosity(
     debug_only = debug_only or []
 
     # Always present at all levels
-    assert_contains_all(output, always_present, f"level {level} (always present)")
+    assert_contains_all(
+        output,
+        always_present,
+        f'level {level} (always present)',
+    )
 
     if level >= 1:
         # Verbose content should be visible
-        assert_contains_all(output, verbose_only, f"level {level} (verbose)")
+        assert_contains_all(output, verbose_only, f'level {level} (verbose)')
     else:
         # Verbose content should NOT be visible
-        assert_not_contains_any(output, verbose_only, f"level {level} (verbose hidden)")
+        assert_not_contains_any(
+            output,
+            verbose_only,
+            f'level {level} (verbose hidden)',
+        )
 
     if level >= 2:
         # Debug content should be visible
-        assert_contains_all(output, debug_only, f"level {level} (debug)")
+        assert_contains_all(output, debug_only, f'level {level} (debug)')
     else:
         # Debug content should NOT be visible
-        assert_not_contains_any(output, debug_only, f"level {level} (debug hidden)")
+        assert_not_contains_any(
+            output,
+            debug_only,
+            f'level {level} (debug hidden)',
+        )

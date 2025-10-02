@@ -1,5 +1,4 @@
-"""
-hotlog: Generalized logging utility for Python projects
+"""hotlog: Generalized logging utility for Python projects
 
 Provides three levels of verbosity:
 - Level 0 (default): Essential info with live updates that can disappear
@@ -19,33 +18,36 @@ Usage:
 """
 
 import logging
+import sys
+from collections.abc import Callable
+from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import List, Optional
+
 import structlog
 import yaml
-import sys
 from rich.console import Console
-from rich.syntax import Syntax
 from rich.live import Live
-from contextlib import contextmanager
+from rich.syntax import Syntax
 from structlog.types import FilteringBoundLogger
 from structlog.typing import EventDict
-from typing import Callable, Optional, List
-from dataclasses import dataclass
 
 
 def _get_console() -> Console:
     """Get a Console instance that writes to the current sys.stdout.
-    
+
     This ensures compatibility with pytest's output capturing by always
     using the current sys.stdout, not a cached version. We don't force
     terminal mode but ensure output is not suppressed.
     """
     return Console(file=sys.stdout, force_jupyter=False)
 
+
 # Type alias for our logger
 Logger = FilteringBoundLogger
 
 # Default prefixes for context filtering
-DEFAULT_PREFIXES = ["_verbose_", "_debug_", "_perf_", "_security_"]
+DEFAULT_PREFIXES = ['_verbose_', '_debug_', '_perf_', '_security_']
 
 # Global verbosity level (0=default, 1=verbose, 2=debug)
 _VERBOSITY_LEVEL = 0
@@ -80,7 +82,7 @@ class LogMatcher:
         level: str,
         event: str,
         event_dict: EventDict,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Format the log message.
 
         Args:
@@ -109,32 +111,27 @@ class ToolMatch(LogMatcher):
         tool_key: Key containing the tool name (default: "tool")
     """
 
-    event: str = "executing"
-    prefix: str = "tb"
-    level: str = "INFO"
-    command_key: str = "command"
-    tool_key: str = "tool"
+    event: str = 'executing'
+    prefix: str = 'tb'
+    level: str = 'INFO'
+    command_key: str = 'command'
+    tool_key: str = 'tool'
 
     def matches(self, level: str, event: str, event_dict: EventDict) -> bool:
-        return (
-            level == self.level
-            and event == self.event
-            and self.command_key in event_dict
-        )
+        return level == self.level and event == self.event and self.command_key in event_dict
 
     def format(
         self,
         level: str,
         event: str,
         event_dict: EventDict,
-    ) -> Optional[str]:
+    ) -> str | None:
         command = event_dict.pop(self.command_key)
-        tool_name = event_dict.pop(self.tool_key, "")
+        tool_name = event_dict.pop(self.tool_key, '')
 
         if tool_name:
-            return f"[bold #888888]{self.prefix}\\[{tool_name}] =>[/bold #888888] [blue]{command}[/blue]"
-        else:
-            return f"[blue]{command}[/blue]"
+            return f'[bold #888888]{self.prefix}\\[{tool_name}] =>[/bold #888888] [blue]{command}[/blue]'
+        return f'[blue]{command}[/blue]'
 
 
 def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
@@ -148,14 +145,14 @@ def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
         The formatted YAML string.
     """
     if not event_dict:
-        return ""
+        return ''
     context_yaml = yaml.safe_dump(
         event_dict,
         sort_keys=True,
         default_flow_style=False,
     )
-    pad = " " * indent
-    return "\n".join(f"{pad}{line}" for line in context_yaml.splitlines())
+    pad = ' ' * indent
+    return '\n'.join(f'{pad}{line}' for line in context_yaml.splitlines())
 
 
 def pre_process_log(event_msg: str, event_dict: EventDict) -> str:
@@ -169,7 +166,7 @@ def pre_process_log(event_msg: str, event_dict: EventDict) -> str:
         The processed event message.
     """
     # Remove internal structlog keys
-    for key in ("timestamp", "level", "log_level", "event"):
+    for key in ('timestamp', 'level', 'log_level', 'event'):
         event_dict.pop(key, None)
     return event_msg
 
@@ -193,11 +190,11 @@ def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
     for key, value in event_dict.items():
         if _VERBOSITY_LEVEL == 0:
             # Default mode: filter out _verbose_ and _debug_
-            if key.startswith("_verbose_") or key.startswith("_debug_"):
+            if key.startswith('_verbose_') or key.startswith('_debug_'):
                 continue
         elif _VERBOSITY_LEVEL == 1:
             # Verbose mode: only filter out _debug_
-            if key.startswith("_debug_"):
+            if key.startswith('_debug_'):
                 continue
 
         filtered_dict[key] = value
@@ -207,7 +204,7 @@ def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
 
 def strip_prefixes_from_keys(event_dict: EventDict) -> EventDict:
     """Strip display prefixes from keys for cleaner output."""
-    display_prefixes = ["_verbose_", "_debug_", "_perf_", "_security_"]
+    display_prefixes = ['_verbose_', '_debug_', '_perf_', '_security_']
 
     cleaned_dict = {}
     for key, value in event_dict.items():
@@ -241,10 +238,10 @@ def cli_renderer(
     global _LIVE_CONTEXT, _LIVE_MESSAGES, _VERBOSITY_LEVEL, _MATCHERS
 
     level = method_name.upper()
-    event_msg = event_dict.pop("event", "")
+    event_msg = event_dict.pop('event', '')
 
     # Check if this is a live message (should be buffered at level 0)
-    is_live_message = event_dict.pop("_live_", False)
+    is_live_message = event_dict.pop('_live_', False)
 
     # Pre-process to remove internal keys
     event_msg = pre_process_log(event_msg, event_dict)
@@ -269,27 +266,27 @@ def cli_renderer(
 
         # Map log levels to colors/styles
         level_styles = {
-            "INFO": "blue",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "DEBUG": "magenta",
-            "CRITICAL": "white on red",
-            "SUCCESS": "green",
+            'INFO': 'blue',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'DEBUG': 'magenta',
+            'CRITICAL': 'white on red',
+            'SUCCESS': 'green',
         }
 
         # Pick style, fallback to bold cyan for unknown
-        style = level_styles.get(level, "bold cyan")
+        style = level_styles.get(level, 'bold cyan')
 
         # Clean output without level prefix (uv style)
-        if level == "DEBUG":
+        if level == 'DEBUG':
             # Show DEBUG prefix only in debug mode
-            log_msg = f"[{style}]DEBUG[/{style}] [{style}]{event_msg}[/{style}]"
-        elif level in ("WARNING", "ERROR", "CRITICAL"):
+            log_msg = f'[{style}]DEBUG[/{style}] [{style}]{event_msg}[/{style}]'
+        elif level in ('WARNING', 'ERROR', 'CRITICAL'):
             # Show level for warnings and errors (important)
-            log_msg = f"[bold {style}]{level}:[/bold {style}] [{style}]{event_msg}[/{style}]"
+            log_msg = f'[bold {style}]{level}:[/bold {style}] [{style}]{event_msg}[/{style}]'
         else:
             # INFO and SUCCESS: no prefix, just the message
-            log_msg = f"[{style}]{event_msg}[/{style}]"
+            log_msg = f'[{style}]{event_msg}[/{style}]'
     else:
         # Matcher provided formatting, still need to process context
         event_dict = filter_context_by_prefix(event_dict)
@@ -309,9 +306,9 @@ def cli_renderer(
                 display_lines.append(msg)
                 if ctx:
                     # Indent context for better readability
-                    for line in ctx.split("\n"):
-                        display_lines.append(f"  {line}")
-            _LIVE_CONTEXT.update("\n".join(display_lines))
+                    for line in ctx.split('\n'):
+                        display_lines.append(f'  {line}')
+            _LIVE_CONTEXT.update('\n'.join(display_lines))
     else:
         # Normal mode or level 1+: print to console directly
         console = _get_console()
@@ -319,20 +316,20 @@ def cli_renderer(
         if context_yaml:
             syntax = Syntax(
                 context_yaml,
-                "yaml",
-                theme="github-dark",
-                background_color="default",
+                'yaml',
+                theme='github-dark',
+                background_color='default',
                 line_numbers=False,
             )
             console.print(syntax)
 
-    return ""  # structlog expects a string return, but we already printed
+    return ''  # structlog expects a string return, but we already printed
 
 
 def configure_logging(
     verbosity: int = 0,
-    renderer: Optional[Callable] = None,
-    matchers: Optional[List[LogMatcher]] = None,
+    renderer: Callable | None = None,
+    matchers: list[LogMatcher] | None = None,
 ) -> None:
     """Configure structlog for hotlog.
 
@@ -353,11 +350,11 @@ def configure_logging(
 
     # Reset structlog to clear any cached loggers
     structlog.reset_defaults()
-    
+
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,
-            structlog.processors.TimeStamper(fmt="ISO", utc=False),
+            structlog.processors.TimeStamper(fmt='ISO', utc=False),
             structlog.stdlib.add_log_level,
             chosen_renderer,
         ],
@@ -385,19 +382,19 @@ class LiveLogger:
         """Log info message (buffered in live mode at level 0)."""
         if self._is_live_mode:
             # Mark this as a live message so the renderer knows to buffer it
-            kwargs["_live_"] = True
+            kwargs['_live_'] = True
         self._logger.info(event, **kwargs)
 
     def debug(self, event: str, **kwargs):
         """Log debug message (buffered in live mode at level 0)."""
         if self._is_live_mode:
-            kwargs["_live_"] = True
+            kwargs['_live_'] = True
         self._logger.debug(event, **kwargs)
 
     def warning(self, event: str, **kwargs):
         """Log warning message (buffered in live mode at level 0)."""
         if self._is_live_mode:
-            kwargs["_live_"] = True
+            kwargs['_live_'] = True
         self._logger.warning(event, **kwargs)
 
     def error(self, event: str, **kwargs):
@@ -434,12 +431,12 @@ def highlight(text: str, *values) -> str:
         logger.info(highlight("Installed {} in {}", "5 packages", "3ms"))
         # Renders as: "Installed [bold]5 packages[/bold] in [bold]3ms[/bold]"
     """
-    bold_values = [f"[bold]{v}[/bold]" for v in values]
+    bold_values = [f'[bold]{v}[/bold]' for v in values]
     return text.format(*bold_values)
 
 
 @contextmanager
-def live_logging(message: str = "Processing..."):
+def live_logging(message: str = 'Processing...'):
     """Context manager for live logging with dynamic behavior based on verbosity.
 
     Returns a LiveLogger that:
@@ -458,13 +455,13 @@ def live_logging(message: str = "Processing..."):
     """
     global _LIVE_CONTEXT, _LIVE_MESSAGES, _VERBOSITY_LEVEL
 
-    base_logger = get_logger("live")
+    base_logger = get_logger('live')
 
     if _VERBOSITY_LEVEL == 0:
         # Level 0: Use live display with buffering
         _LIVE_MESSAGES = []  # Clear message buffer
         with Live(
-            f"[bold blue]{message}[/bold blue]",
+            f'[bold blue]{message}[/bold blue]',
             console=_get_console(),
             refresh_per_second=10,
             transient=True,  # Makes the live display disappear when done!
@@ -478,17 +475,17 @@ def live_logging(message: str = "Processing..."):
                 _LIVE_MESSAGES = []  # Clear buffered messages (they disappear)
     else:
         # Level 1+: Just print header and return LiveLogger without buffering
-        _get_console().print(f"[bold blue]{message}[/bold blue]")
+        _get_console().print(f'[bold blue]{message}[/bold blue]')
         # Return LiveLogger that doesn't mark messages for buffering
         yield LiveLogger(base_logger, is_live_mode=False)
 
 
 # Public API
 __all__ = [
-    "configure_logging",
-    "get_logger",
-    "live_logging",
-    "highlight",
-    "LogMatcher",
-    "ToolMatch",
+    'LogMatcher',
+    'ToolMatch',
+    'configure_logging',
+    'get_logger',
+    'highlight',
+    'live_logging',
 ]

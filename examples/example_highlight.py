@@ -1,5 +1,4 @@
-"""
-Example showing how to highlight important information in messages
+"""Example showing how to highlight important information in messages
 
 Demonstrates:
 1. Direct Rich markup in messages
@@ -12,18 +11,21 @@ Run with:
 """
 
 import argparse
+
 from hotlog import configure_logging, get_logger, highlight
 
 
 def main():
     """Run the highlight example."""
-    parser = argparse.ArgumentParser(description="Highlighting examples using hotlog")
+    parser = argparse.ArgumentParser(
+        description='Highlighting examples using hotlog',
+    )
     parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
+        '-v',
+        '--verbose',
+        action='count',
         default=0,
-        help="Increase verbosity",
+        help='Increase verbosity',
     )
     args = parser.parse_args()
 
@@ -33,58 +35,57 @@ def main():
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 
-    print(f"\n=== Highlighting Examples (verbosity level: {verbosity}) ===\n")
+    print(f'\n=== Highlighting Examples (verbosity level: {verbosity}) ===\n')
 
     # Example 1: Direct Rich markup (simplest)
-    logger.info("Installed [bold]5 packages[/bold] in [bold]3ms[/bold]")
+    logger.info('Installed [bold]5 packages[/bold] in [bold]3ms[/bold]')
 
     # Example 2: Using the highlight() helper
-    logger.info(highlight("Downloaded {} in {}", "14 files", "2.5s"))
+    logger.info(highlight('Downloaded {} in {}', '14 files', '2.5s'))
 
     # Example 3: Event-based message with highlighted summary (level 0 only)
     # This is perfect for level 0 where you want a clean summary
     logger.info(
         highlight(
-            "Resolved {} with {} in {}",
-            "42 dependencies",
-            "no conflicts",
-            "150ms",
+            'Resolved {} with {} in {}',
+            '42 dependencies',
+            'no conflicts',
+            '150ms',
         ),
-        _verbose_packages="react, vue, angular, ...",
-        _verbose_registry="https://registry.npmjs.org",
+        _verbose_packages='react, vue, angular, ...',
+        _verbose_registry='https://registry.npmjs.org',
     )
 
     # Example 4: Mixed - some bold, some not
-    logger.info("Processing [bold]100 records[/bold] from database")
+    logger.info('Processing [bold]100 records[/bold] from database')
 
     # Example 5: Event name with highlighted values
     logger.info(
         highlight(
-            "Compilation completed: {} successful, {} failed",
-            "95 files",
-            "5 files",
+            'Compilation completed: {} successful, {} failed',
+            '95 files',
+            '5 files',
         ),
-        _verbose_duration="5.2s",
-        _verbose_warnings="12",
+        _verbose_duration='5.2s',
+        _verbose_warnings='12',
     )
 
     # Example 6: Numbers and units
-    logger.info(highlight("Cache size: {} ({})", "2.5GB", "1,234 entries"))
+    logger.info(highlight('Cache size: {} ({})', '2.5GB', '1,234 entries'))
 
     # Example 7: With warning
     logger.warning(
         highlight(
-            "Rate limit approaching: {} of {} used",
-            "95 requests",
-            "100 requests",
+            'Rate limit approaching: {} of {} used',
+            '95 requests',
+            '100 requests',
         ),
     )
 
-    print("\n=== Examples completed ===")
-    print("\nNotice how at level 0, only the summary message appears.")
-    print("At level 1 (-v), you also see the verbose context.")
+    print('\n=== Examples completed ===')
+    print('\nNotice how at level 0, only the summary message appears.')
+    print('At level 1 (-v), you also see the verbose context.')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-

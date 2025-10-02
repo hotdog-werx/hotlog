@@ -1,5 +1,4 @@
-"""
-Example demonstrating how to create a custom log matcher
+"""Example demonstrating how to create a custom log matcher
 
 This shows how to extend the LogMatcher base class to create
 custom formatting rules for specific log patterns.
@@ -10,9 +9,10 @@ Run with:
 """
 
 import argparse
-from hotlog import configure_logging, get_logger, LogMatcher, ToolMatch
+
 from structlog.typing import EventDict
-from typing import Optional
+
+from hotlog import LogMatcher, ToolMatch, configure_logging, get_logger
 
 
 class InstallMatch(LogMatcher):
@@ -22,18 +22,18 @@ class InstallMatch(LogMatcher):
     """
 
     def matches(self, level: str, event: str, event_dict: EventDict) -> bool:
-        return level == "INFO" and event == "installed" and "package" in event_dict
+        return level == 'INFO' and event == 'installed' and 'package' in event_dict
 
     def format(
         self,
         level: str,
         event: str,
         event_dict: EventDict,
-    ) -> Optional[str]:
-        package = event_dict.pop("package")
-        version = event_dict.pop("version", "unknown")
+    ) -> str | None:
+        package = event_dict.pop('package')
+        version = event_dict.pop('version', 'unknown')
 
-        return f"[green]✓[/green] Installed [bold]{package}[/bold] [dim](version {version})[/dim]"
+        return f'[green]✓[/green] Installed [bold]{package}[/bold] [dim](version {version})[/dim]'
 
 
 class ErrorMatch(LogMatcher):
@@ -43,28 +43,30 @@ class ErrorMatch(LogMatcher):
     """
 
     def matches(self, level: str, event: str, event_dict: EventDict) -> bool:
-        return level == "ERROR" and "error_code" in event_dict
+        return level == 'ERROR' and 'error_code' in event_dict
 
     def format(
         self,
         level: str,
         event: str,
         event_dict: EventDict,
-    ) -> Optional[str]:
-        error_code = event_dict.pop("error_code")
+    ) -> str | None:
+        error_code = event_dict.pop('error_code')
 
-        return f"[red]✗ [{error_code}][/red] [bold red]{event}[/bold red]"
+        return f'[red]✗ [{error_code}][/red] [bold red]{event}[/bold red]'
 
 
 def main():
     """Run the custom matcher example."""
-    parser = argparse.ArgumentParser(description="Custom matcher example using hotlog")
+    parser = argparse.ArgumentParser(
+        description='Custom matcher example using hotlog',
+    )
     parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
+        '-v',
+        '--verbose',
+        action='count',
         default=0,
-        help="Increase verbosity",
+        help='Increase verbosity',
     )
     args = parser.parse_args()
 
@@ -76,48 +78,47 @@ def main():
         matchers=[
             InstallMatch(),
             ErrorMatch(),
-            ToolMatch(event="executing", prefix="pkg"),
+            ToolMatch(event='executing', prefix='pkg'),
         ],
     )
     logger = get_logger(__name__)
 
-    print(f"\n=== Custom Matcher Example (verbosity level: {verbosity}) ===\n")
+    print(f'\n=== Custom Matcher Example (verbosity level: {verbosity}) ===\n')
 
     # Example 1: Package installation (matched by InstallMatch)
     logger.info(
-        "installed",
-        package="requests",
-        version="2.31.0",
-        _verbose_size="120 KB",
+        'installed',
+        package='requests',
+        version='2.31.0',
+        _verbose_size='120 KB',
     )
 
     logger.info(
-        "installed",
-        package="structlog",
-        version="25.4.0",
+        'installed',
+        package='structlog',
+        version='25.4.0',
     )
 
     # Example 2: Error with code (matched by ErrorMatch)
     logger.error(
-        "Failed to connect to database",
-        error_code="E001",
-        _verbose_host="localhost:5432",
+        'Failed to connect to database',
+        error_code='E001',
+        _verbose_host='localhost:5432',
     )
 
     # Example 3: Tool execution (matched by ToolMatch)
     logger.info(
-        "executing",
-        command="uv pip install requests",
-        tool="uv-install",
+        'executing',
+        command='uv pip install requests',
+        tool='uv-install',
         _verbose_cache_hit=True,
     )
 
     # Example 4: Regular message (uses default formatting)
-    logger.info("Build completed successfully")
+    logger.info('Build completed successfully')
 
-    print("\n=== Custom matcher example completed ===")
+    print('\n=== Custom matcher example completed ===')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-

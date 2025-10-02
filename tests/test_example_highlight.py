@@ -28,7 +28,7 @@ from tests.test_helpers import (
                 '_verbose_packages',
                 '_verbose_registry',
             ],
-            desc='basic messages without verbose context',
+            desc='basic_messages_without_verbose_context',
         ),
         # Level 1 - Verbose context visible
         level_1(
@@ -47,17 +47,17 @@ from tests.test_helpers import (
                 '_verbose_packages',
                 '_verbose_registry',
             ],
-            desc='verbose context visible',
+            desc='verbose_context_visible',
         ),
         # Test highlight() helper specifically
         level_0(
             'Downloaded 14 files in 2.5s',
-            desc='highlight() helper works',
+            desc='highlight()_helper_works',
         ),
         # Test warning messages
         level_0(
             'Rate limit approaching: 95 requests of 100 requests used',
-            desc='warnings shown at level 0',
+            desc='warnings_shown_at_level_0',
         ),
     ],
     ids=lambda e: e.description,

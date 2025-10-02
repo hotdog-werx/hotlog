@@ -35,7 +35,7 @@ from tests.test_helpers import (
                 'config_path:',
                 'exit_code:',
             ],
-            desc='basic tool execution logging without verbose/debug details',
+            desc='basic_tool_execution_logging_without_verbose/debug_details',
         ),
         level_1(
             'Toolbelt Style Logging (verbosity level: 1)',
@@ -49,7 +49,7 @@ from tests.test_helpers import (
             'fixes_applied:',
             'result: 34 files left unchanged',
             should_not_contain=['config_path:', 'exit_code:'],
-            desc='verbose context visible, debug hidden',
+            desc='verbose_context_visible,_debug_hidden',
         ),
         level_2(
             'Toolbelt Style Logging (verbosity level: 2)',
@@ -60,7 +60,7 @@ from tests.test_helpers import (
             'fixes_applied:',
             'config_path:',
             'exit_code:',
-            desc='all context including debug visible',
+            desc='all_context_including_debug_visible',
         ),
         level_0(
             'tb[ruff-format-80] =>',
@@ -72,7 +72,7 @@ from tests.test_helpers import (
             'uvx add-trailing-comma@3.2.0',
             '--config .codeguide/configs/ruff.toml',
             '--exit-zero-even-if-changed',
-            desc='tool names formatted and commands displayed',
+            desc='tool_names_formatted_and_commands_displayed',
         ),
     ],
     ids=lambda e: e.description,

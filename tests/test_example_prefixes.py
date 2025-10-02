@@ -38,7 +38,7 @@ from tests.test_helpers import (
                 'connection:',
                 'query_plan:',
             ],
-            desc='base context shown, verbose/debug prefixes filtered at level 0',
+            desc='base_context_shown,_verbose/debug_prefixes_filtered_at_level_0',
         ),
         level_1(
             'Processing dataset',
@@ -62,7 +62,7 @@ from tests.test_helpers import (
                 'query_plan:',
                 'cache_hit:',
             ],
-            desc='verbose prefixes visible, debug hidden at level 1',
+            desc='verbose_prefixes_visible,_debug_hidden_at_level_1',
         ),
         level_2(
             'Processing dataset',
@@ -84,7 +84,7 @@ from tests.test_helpers import (
             'query_plan: Sequential Scan',
             'cache_hit: true',
             'verbosity level: 2',
-            desc='all prefixes including debug visible at level 2',
+            desc='all_prefixes_including_debug_visible_at_level_2',
         ),
     ],
     ids=lambda e: e.description,

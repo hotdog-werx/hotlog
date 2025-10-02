@@ -23,7 +23,7 @@ from tests.test_helpers import CommandTest
                 'compile_bytecode:',
                 'url:',
             ],
-            description='install at level 0',
+            description='install_at_level_0',
         ),
         CommandTest(
             command=['install', 'mypackage'],
@@ -35,7 +35,7 @@ from tests.test_helpers import CommandTest
                 'location: /usr/local/lib/python3.11/site-packages',
             ],
             should_not_contain=['compile_bytecode:', 'url:'],
-            description='install at level 1 (verbose)',
+            description='install_at_level_1_(verbose)',
         ),
         CommandTest(
             command=['install', 'mypackage'],
@@ -48,7 +48,7 @@ from tests.test_helpers import CommandTest
                 'compile_bytecode: true',
                 'url: https://pypi.org/simple/',
             ],
-            description='install at level 2 (debug)',
+            description='install_at_level_2_(debug)',
         ),
         # Update command
         CommandTest(
@@ -59,7 +59,7 @@ from tests.test_helpers import CommandTest
                 'Update completed',
             ],
             should_not_contain=['changelog_url:', 'backup_created:'],
-            description='update at level 0',
+            description='update_at_level_0',
         ),
         CommandTest(
             command=['update', 'requests'],
@@ -71,7 +71,7 @@ from tests.test_helpers import CommandTest
                 'new_version:',
             ],
             should_not_contain=['backup_created:'],
-            description='update at level 1',
+            description='update_at_level_1',
         ),
         CommandTest(
             command=['update', 'requests'],
@@ -83,7 +83,7 @@ from tests.test_helpers import CommandTest
                 'new_version:',
                 'backup_created:',
             ],
-            description='update at level 2',
+            description='update_at_level_2',
         ),
         # Remove command
         CommandTest(
@@ -93,20 +93,20 @@ from tests.test_helpers import CommandTest
                 'Removing oldpackage',
                 'Package removed successfully',
             ],
-            description='remove command',
+            description='remove_command',
         ),
         # Different package names
         CommandTest(
             command=['install', 'flask'],
             verbosity=0,
             should_contain=['Installation completed successfully'],
-            description='install flask',
+            description='install_flask',
         ),
         CommandTest(
             command=['install', 'django'],
             verbosity=0,
             should_contain=['Installation completed successfully'],
-            description='install django',
+            description='install_django',
         ),
         # YAML formatting check
         CommandTest(
@@ -116,7 +116,7 @@ from tests.test_helpers import CommandTest
                 'resolver: pip-compatible',
                 'location: /usr/local/lib/python3.11/site-packages',
             ],
-            description='YAML context formatting',
+            description='YAML_context_formatting',
         ),
         # Missing arguments - check stderr instead of stdout
         CommandTest(
@@ -124,14 +124,14 @@ from tests.test_helpers import CommandTest
             verbosity=0,
             should_contain=['usage:', 'install', 'update', 'remove'],
             should_fail=True,
-            description='missing arguments shows help',
+            description='missing_arguments_shows_help',
         ),
         # Verbosity capping
         CommandTest(
             command=['install', 'pkg'],
             verbosity=2,
             should_contain=['Installation completed successfully'],
-            description='verbosity capped at 2',
+            description='verbosity_capped_at_2',
         ),
     ],
     ids=lambda t: t.description,

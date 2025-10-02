@@ -38,7 +38,7 @@ from tests.test_helpers import (
                 'build_context:',
                 'size: 2MB',
             ],
-            desc='basic messages, warnings shown, verbose/debug hidden at level 0',
+            desc='basic_messages,_warnings_shown,_verbose/debug_hidden_at_level_0',
         ),
         level_1(
             'Configuration loaded',
@@ -53,7 +53,7 @@ from tests.test_helpers import (
             'size: 6MB',
             'verbosity level: 1',
             should_not_contain=['raw_config:', 'build_context:'],
-            desc='verbose context and live logging visible, debug hidden at level 1',
+            desc='verbose_context_and_live_logging_visible,_debug_hidden_at_level_1',
         ),
         level_2(
             'Configuration loaded',
@@ -63,7 +63,7 @@ from tests.test_helpers import (
             'layers: 12',
             'build_context: /tmp/build-123',
             'verbosity level: 2',
-            desc='all context including debug visible at level 2',
+            desc='all_context_including_debug_visible_at_level_2',
         ),
     ],
     ids=lambda e: e.description,

@@ -9,7 +9,7 @@ Run with:
     python example_custom_matcher.py -v
 """
 
-import sys
+import argparse
 from hotlog import configure_logging, get_logger, LogMatcher, ToolMatch
 from structlog.typing import EventDict
 from typing import Optional
@@ -56,54 +56,68 @@ class ErrorMatch(LogMatcher):
         return f"[red]✗ [{error_code}][/red] [bold red]{event}[/bold red]"
 
 
-# Parse verbosity from command line
-verbosity = 0
-if "-v" in sys.argv or "--verbose" in sys.argv:
-    verbosity = 1
+def main():
+    """Run the custom matcher example."""
+    parser = argparse.ArgumentParser(description="Custom matcher example using hotlog")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase verbosity",
+    )
+    args = parser.parse_args()
 
-# Configure logging with multiple custom matchers
-configure_logging(
-    verbosity=verbosity,
-    matchers=[
-        InstallMatch(),
-        ErrorMatch(),
-        ToolMatch(event="executing", prefix="pkg"),
-    ],
-)
-logger = get_logger(__name__)
+    verbosity = args.verbose
 
-print(f"\n=== Custom Matcher Example (verbosity level: {verbosity}) ===\n")
+    # Configure logging with multiple custom matchers
+    configure_logging(
+        verbosity=verbosity,
+        matchers=[
+            InstallMatch(),
+            ErrorMatch(),
+            ToolMatch(event="executing", prefix="pkg"),
+        ],
+    )
+    logger = get_logger(__name__)
 
-# Example 1: Package installation (matched by InstallMatch)
-logger.info(
-    "installed",
-    package="requests",
-    version="2.31.0",
-    _verbose_size="120 KB",
-)
+    print(f"\n=== Custom Matcher Example (verbosity level: {verbosity}) ===\n")
 
-logger.info(
-    "installed",
-    package="structlog",
-    version="25.4.0",
-)
+    # Example 1: Package installation (matched by InstallMatch)
+    logger.info(
+        "installed",
+        package="requests",
+        version="2.31.0",
+        _verbose_size="120 KB",
+    )
 
-# Example 2: Error with code (matched by ErrorMatch)
-logger.error(
-    "Failed to connect to database",
-    error_code="E001",
-    _verbose_host="localhost:5432",
-)
+    logger.info(
+        "installed",
+        package="structlog",
+        version="25.4.0",
+    )
 
-# Example 3: Tool execution (matched by ToolMatch)
-logger.info(
-    "executing",
-    command="uv pip install requests",
-    tool="uv-install",
-    _verbose_cache_hit=True,
-)
+    # Example 2: Error with code (matched by ErrorMatch)
+    logger.error(
+        "Failed to connect to database",
+        error_code="E001",
+        _verbose_host="localhost:5432",
+    )
 
-# Example 4: Regular message (uses default formatting)
-logger.info("Build completed successfully")
+    # Example 3: Tool execution (matched by ToolMatch)
+    logger.info(
+        "executing",
+        command="uv pip install requests",
+        tool="uv-install",
+        _verbose_cache_hit=True,
+    )
 
-print("\n=== Custom matcher example completed ===")
+    # Example 4: Regular message (uses default formatting)
+    logger.info("Build completed successfully")
+
+    print("\n=== Custom matcher example completed ===")
+
+
+if __name__ == "__main__":
+    main()
+

@@ -9,10 +9,19 @@ Run with:
     python example_cli.py -vv install package-name
 """
 
+import os
 import sys
 import time
 import argparse
 from hotlog import configure_logging, get_logger, live_logging
+
+
+# Helper to make sleep time configurable (useful for tests)
+def _sleep(seconds: float) -> None:
+    """Sleep for the specified seconds, or skip if HOTLOG_NO_DELAY is set."""
+    if os.environ.get("HOTLOG_NO_DELAY"):
+        return
+    time.sleep(seconds)
 
 
 def install_package(package_name: str, logger):
@@ -20,14 +29,14 @@ def install_package(package_name: str, logger):
 
     # Step 1: Resolve dependencies (live)
     with live_logging(f"Resolving dependencies for {package_name}...") as live:
-        time.sleep(0.8)
+        _sleep(0.8)
         live.info(
             "Dependency resolution started",
             package=package_name,
             _verbose_resolver="pip-compatible",
             _debug_cache_dir="/tmp/cache",
         )
-        time.sleep(0.5)
+        _sleep(0.5)
         live.info(
             "Found dependencies",
             count=3,
@@ -40,7 +49,7 @@ def install_package(package_name: str, logger):
     packages = [package_name, "requests", "pyyaml", "click"]
     with live_logging(f"Downloading {len(packages)} packages...") as live:
         for i, pkg in enumerate(packages, 1):
-            time.sleep(0.4)
+            _sleep(0.4)
             live.info(
                 f"Downloaded {pkg}",
                 progress=f"{i}/{len(packages)}",
@@ -57,7 +66,7 @@ def install_package(package_name: str, logger):
     # Step 3: Install packages
     with live_logging("Installing packages...") as live:
         for pkg in packages:
-            time.sleep(0.3)
+            _sleep(0.3)
             live.info(
                 f"Installing {pkg}",
                 _verbose_location="/usr/local/lib/python3.11/site-packages",
@@ -74,7 +83,7 @@ def update_package(package_name: str, logger):
     """Simulate updating a package."""
 
     logger.info(f"Checking for updates to {package_name}")
-    time.sleep(0.5)
+    _sleep(0.5)
 
     logger.info(
         "Update available",
@@ -84,9 +93,9 @@ def update_package(package_name: str, logger):
     )
 
     with live_logging(f"Updating {package_name}...") as live:
-        time.sleep(1)
+        _sleep(1)
         live.info("Downloading update", _verbose_size="3.5MB")
-        time.sleep(0.8)
+        _sleep(0.8)
         live.info("Applying update", _debug_backup_created=True)
 
     logger.info("Update completed", new_version="1.2.0")
@@ -136,7 +145,7 @@ Examples:
             update_package(args.package, logger)
         elif args.command == "remove":
             logger.info(f"Removing {args.package}")
-            time.sleep(0.5)
+            _sleep(0.5)
             logger.info("Package removed successfully")
 
         print("\n=== Operation completed ===\n")

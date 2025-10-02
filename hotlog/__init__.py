@@ -21,6 +21,7 @@ Usage:
 import logging
 import structlog
 import yaml
+import sys
 from rich.console import Console
 from rich.syntax import Syntax
 from rich.live import Live
@@ -30,8 +31,15 @@ from structlog.typing import EventDict
 from typing import Callable, Optional, List
 from dataclasses import dataclass
 
-# Global console instance
-console = Console()
+
+def _get_console() -> Console:
+    """Get a Console instance that writes to the current sys.stdout.
+    
+    This ensures compatibility with pytest's output capturing by always
+    using the current sys.stdout, not a cached version. We don't force
+    terminal mode but ensure output is not suppressed.
+    """
+    return Console(file=sys.stdout, force_jupyter=False)
 
 # Type alias for our logger
 Logger = FilteringBoundLogger
@@ -41,9 +49,6 @@ DEFAULT_PREFIXES = ["_verbose_", "_debug_", "_perf_", "_security_"]
 
 # Global verbosity level (0=default, 1=verbose, 2=debug)
 _VERBOSITY_LEVEL = 0
-
-# Global flag to show log level prefixes
-_SHOW_LEVELS = False
 
 # Global matchers for custom formatting
 _MATCHERS = []
@@ -233,7 +238,7 @@ def cli_renderer(
     Returns:
         str: An empty string, as structlog expects a string return but output is printed.
     """
-    global _LIVE_CONTEXT, _LIVE_MESSAGES, _VERBOSITY_LEVEL, _SHOW_LEVELS, _MATCHERS
+    global _LIVE_CONTEXT, _LIVE_MESSAGES, _VERBOSITY_LEVEL, _MATCHERS
 
     level = method_name.upper()
     event_msg = event_dict.pop("event", "")
@@ -275,22 +280,16 @@ def cli_renderer(
         # Pick style, fallback to bold cyan for unknown
         style = level_styles.get(level, "bold cyan")
 
-        if _SHOW_LEVELS:
-            # Show log level prefix (traditional style)
-            log_msg = (
-                f"[bold {style}][{level}][/bold {style}] [{style}]{event_msg}[/{style}]"
-            )
+        # Clean output without level prefix (uv style)
+        if level == "DEBUG":
+            # Show DEBUG prefix only in debug mode
+            log_msg = f"[{style}]DEBUG[/{style}] [{style}]{event_msg}[/{style}]"
+        elif level in ("WARNING", "ERROR", "CRITICAL"):
+            # Show level for warnings and errors (important)
+            log_msg = f"[bold {style}]{level}:[/bold {style}] [{style}]{event_msg}[/{style}]"
         else:
-            # Clean output without level prefix (uv style)
-            if level == "DEBUG":
-                # Show DEBUG prefix only in debug mode
-                log_msg = f"[{style}]DEBUG[/{style}] [{style}]{event_msg}[/{style}]"
-            elif level in ("WARNING", "ERROR", "CRITICAL"):
-                # Show level for warnings and errors (important)
-                log_msg = f"[bold {style}]{level}:[/bold {style}] [{style}]{event_msg}[/{style}]"
-            else:
-                # INFO and SUCCESS: no prefix, just the message
-                log_msg = f"[{style}]{event_msg}[/{style}]"
+            # INFO and SUCCESS: no prefix, just the message
+            log_msg = f"[{style}]{event_msg}[/{style}]"
     else:
         # Matcher provided formatting, still need to process context
         event_dict = filter_context_by_prefix(event_dict)
@@ -315,6 +314,7 @@ def cli_renderer(
             _LIVE_CONTEXT.update("\n".join(display_lines))
     else:
         # Normal mode or level 1+: print to console directly
+        console = _get_console()
         console.print(log_msg)
         if context_yaml:
             syntax = Syntax(
@@ -332,7 +332,6 @@ def cli_renderer(
 def configure_logging(
     verbosity: int = 0,
     renderer: Optional[Callable] = None,
-    show_levels: bool = False,
     matchers: Optional[List[LogMatcher]] = None,
 ) -> None:
     """Configure structlog for hotlog.
@@ -343,18 +342,18 @@ def configure_logging(
                   - 1: More context, messages stay visible
                   - 2: All debug info, no live updates
         renderer: Custom renderer function (optional)
-        show_levels: Show log level prefixes like [INFO], [WARNING], etc.
-                    Default False for cleaner output (like uv)
         matchers: List of LogMatcher instances for custom log formatting.
                  Example: [ToolMatch(event="executing", prefix="tb")]
     """
-    global _VERBOSITY_LEVEL, _SHOW_LEVELS, _MATCHERS
+    global _VERBOSITY_LEVEL, _MATCHERS
     _VERBOSITY_LEVEL = verbosity
-    _SHOW_LEVELS = show_levels
     _MATCHERS = matchers or []
 
     chosen_renderer = renderer or cli_renderer
 
+    # Reset structlog to clear any cached loggers
+    structlog.reset_defaults()
+    
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,
@@ -369,12 +368,10 @@ def configure_logging(
     )
 
     # Set log level based on verbosity
-    if verbosity >= 2:
-        logging.basicConfig(level=logging.DEBUG, handlers=[])
-    elif verbosity >= 1:
-        logging.basicConfig(level=logging.INFO, handlers=[])
-    else:
-        logging.basicConfig(level=logging.INFO, handlers=[])
+    # Clear existing handlers and set up a basic console handler
+    root_logger = logging.getLogger()
+    root_logger.handlers = []  # Clear existing handlers
+    root_logger.setLevel(logging.DEBUG if verbosity >= 2 else logging.INFO)
 
 
 class LiveLogger:
@@ -468,7 +465,7 @@ def live_logging(message: str = "Processing..."):
         _LIVE_MESSAGES = []  # Clear message buffer
         with Live(
             f"[bold blue]{message}[/bold blue]",
-            console=console,
+            console=_get_console(),
             refresh_per_second=10,
             transient=True,  # Makes the live display disappear when done!
         ) as live:
@@ -481,7 +478,7 @@ def live_logging(message: str = "Processing..."):
                 _LIVE_MESSAGES = []  # Clear buffered messages (they disappear)
     else:
         # Level 1+: Just print header and return LiveLogger without buffering
-        console.print(f"[bold blue]{message}[/bold blue]")
+        _get_console().print(f"[bold blue]{message}[/bold blue]")
         # Return LiveLogger that doesn't mark messages for buffering
         yield LiveLogger(base_logger, is_live_mode=False)
 

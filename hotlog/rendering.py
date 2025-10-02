@@ -53,14 +53,14 @@ def _format_live_display(live_messages: list[tuple[str, str]]) -> str:
         display_lines.append(msg)
         if ctx:
             # Indent context for better readability
-            for line in ctx.split('\n'):
-                display_lines.append(f'  {line}')
+            display_lines.extend(f'  {line}' for line in ctx.split('\n'))
     return '\n'.join(display_lines)
 
 
 def handle_live_buffering(
     log_msg: str,
     context_yaml: str,
+    *,
     is_live_message: bool,
 ) -> bool:
     """Handle buffering of messages for live display.
@@ -166,7 +166,7 @@ def cli_renderer(
     context_yaml = format_context_yaml(event_dict)
 
     # Check if we should buffer this message (live context at level 0)
-    if handle_live_buffering(log_msg, context_yaml, is_live_message):
+    if handle_live_buffering(log_msg, context_yaml, is_live_message=is_live_message):
         # Message was buffered, don't print
         return ''
 

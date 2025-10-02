@@ -24,16 +24,7 @@ class InstallMatch(LogMatcher):
     """
 
     def matches(self, level: str, event: str, event_dict: EventDict) -> bool:
-        """Match installation events at INFO level with 'package' key.
-        
-        Args:
-            level: Log level (e.g., "INFO")
-            event: Event message
-            event_dict: Event context dictionary
-        
-        Returns:
-            True if this matcher should handle the message
-        """
+        """Return True for installation events with package metadata."""
         return level == 'INFO' and event == 'installed' and 'package' in event_dict
 
     def format(
@@ -42,16 +33,8 @@ class InstallMatch(LogMatcher):
         event: str,
         event_dict: EventDict,
     ) -> str | None:
-        """Format as: ✓ Installed package-name (version 1.2.3).
-        
-        Args:
-            level: Log level
-            event: Event message
-            event_dict: Event context dictionary (will be modified)
-
-        Returns:
-            Formatted message string, or None to use default formatting
-        """
+        """Return the formatted installation message."""
+        del level, event
         package = event_dict.pop('package')
         version = event_dict.pop('version', 'unknown')
 
@@ -65,16 +48,8 @@ class ErrorMatch(LogMatcher):
     """
 
     def matches(self, level: str, event: str, event_dict: EventDict) -> bool:
-        """Match error events at ERROR level with 'error_code' key.
-        
-        Args:
-            level: Log level (e.g., "ERROR")
-            event: Event message
-            event_dict: Event context dictionary
-        
-        Returns:
-            True if this matcher should handle the message
-        """
+        """Return True for error events with an error code."""
+        del event
         return level == 'ERROR' and 'error_code' in event_dict
 
     def format(
@@ -83,6 +58,8 @@ class ErrorMatch(LogMatcher):
         event: str,
         event_dict: EventDict,
     ) -> str | None:
+        """Return a formatted error message with the code."""
+        del level
         error_code = event_dict.pop('error_code')
 
         return f'[red]✗ [{error_code}][/red] [bold red]{event}[/bold red]'

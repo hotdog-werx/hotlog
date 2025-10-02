@@ -82,7 +82,7 @@ def main() -> None:
         command='docker build -t myapp:latest .',
         tool='docker-build',
         _verbose_layers=12,
-        _debug_build_context='/tmp/build-123',
+        _debug_build_context='~/builds/build-123',
     )
 
     # 5. Live logging for long operations

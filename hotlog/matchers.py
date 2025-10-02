@@ -89,6 +89,7 @@ class ToolMatch(LogMatcher):
         Extracts command and tool from event_dict and formats with Rich markup.
         If no tool name is present, just shows the command.
         """
+        del level, event
         command = event_dict.pop(self.command_key)
         tool_name = event_dict.pop(self.tool_key, '')
 

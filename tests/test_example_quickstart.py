@@ -59,7 +59,7 @@ from tests.test_helpers import (
             'raw_config:',
             'myapp[docker-build]',
             'layers: 12',
-            'build_context: /tmp/build-123',
+            'build_context: ~/builds/build-123',
             'verbosity level: 2',
             desc='all_context_including_debug_visible_at_level_2',
         ),

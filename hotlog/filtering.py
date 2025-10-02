@@ -20,7 +20,7 @@ def _should_filter_key(key: str, verbosity_level: int) -> bool:
     """
     if verbosity_level == 0:
         # Default mode: filter out _verbose_ and _debug_
-        return key.startswith('_verbose_') or key.startswith('_debug_')
+        return key.startswith(('_verbose_', '_debug_'))
     # Verbose mode (level 1): only filter out _debug_
     return key.startswith('_debug_')
 

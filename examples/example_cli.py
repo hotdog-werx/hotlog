@@ -14,6 +14,8 @@ import sys
 import time
 from textwrap import dedent
 
+from structlog.typing import FilteringBoundLogger
+
 from hotlog import configure_logging, get_logger, live_logging
 
 
@@ -25,7 +27,7 @@ def _sleep(seconds: float) -> None:
     time.sleep(seconds)
 
 
-def install_package(package_name: str, logger) -> None:
+def install_package(package_name: str, logger: FilteringBoundLogger) -> None:
     """Simulate installing a package with various logging levels."""
     # Step 1: Resolve dependencies (live)
     with live_logging(f'Resolving dependencies for {package_name}...') as live:
@@ -34,7 +36,7 @@ def install_package(package_name: str, logger) -> None:
             'Dependency resolution started',
             package=package_name,
             _verbose_resolver='pip-compatible',
-            _debug_cache_dir='/tmp/cache',
+            _debug_cache_dir='~/.cache/hotlog',
         )
         _sleep(0.5)
         live.info(
@@ -79,9 +81,9 @@ def install_package(package_name: str, logger) -> None:
     )
 
 
-def update_package(package_name: str, logger) -> None:
+def update_package(package_name: str, logger: FilteringBoundLogger) -> None:
     """Simulate updating a package."""
-    logger.info(f'Checking for updates to {package_name}')
+    logger.info('Checking for updates to %s', package_name)
     _sleep(0.5)
 
     logger.info(
@@ -101,6 +103,7 @@ def update_package(package_name: str, logger) -> None:
 
 
 def main() -> None:
+    """Parse CLI arguments and execute the selected package command."""
     parser = argparse.ArgumentParser(
         description='Example package manager CLI using hotlog',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -140,24 +143,20 @@ Examples:
     """)
     sys.stdout.write(header)
 
-    try:
-        if args.command == 'install':
-            install_package(args.package, logger)
-        elif args.command == 'update':
-            update_package(args.package, logger)
-        elif args.command == 'remove':
-            logger.info(f'Removing {args.package}')
-            _sleep(0.5)
-            logger.info('Package removed successfully')
+    if args.command == 'install':
+        install_package(args.package, logger)
+    elif args.command == 'update':
+        update_package(args.package, logger)
+    elif args.command == 'remove':
+        msg = f'Removing {args.package}'
+        logger.info(msg)
+        _sleep(0.5)
+        logger.info('Package removed successfully')
 
-        footer = dedent("""
-            === Operation completed ===
-        """)
-        sys.stdout.write(footer)
-
-    except Exception as e:
-        logger.error('Operation failed', error=str(e), _debug_traceback=True)
-        sys.exit(1)
+    footer = dedent("""
+        === Operation completed ===
+    """)
+    sys.stdout.write(footer)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-"""Quick Start Guide for hotlog
+"""Quick Start Guide for hotlog.
 
 This example shows the most common patterns you'll use:
 1. Simple info messages
@@ -12,7 +12,9 @@ Run with: python example_quickstart.py [-v|-vv]
 
 import argparse
 import os
+import sys
 import time
+from textwrap import dedent
 
 from hotlog import (
     ToolMatch,
@@ -23,14 +25,14 @@ from hotlog import (
 )
 
 
-def _sleep(seconds):
+def _sleep(seconds: float) -> None:
     """Sleep for the given time, unless HOTLOG_NO_DELAY is set."""
     if os.environ.get('HOTLOG_NO_DELAY'):
         return
     time.sleep(seconds)
 
 
-def main():
+def main() -> None:
     """Run the quickstart example."""
     parser = argparse.ArgumentParser(
         description='Quick start examples for hotlog',
@@ -53,9 +55,12 @@ def main():
     )
     logger = get_logger(__name__)
 
-    print(f'\n{"=" * 60}')
-    print(f'Quick Start Example (verbosity level: {verbosity})')
-    print(f'{"=" * 60}\n')
+    header = dedent(f"""
+        ============================================================
+        Quick Start Example (verbosity level: {verbosity})
+        ============================================================
+    """)
+    sys.stdout.write(header)
 
     # 1. Simple messages
     logger.info('Application starting', version='1.0.0')
@@ -91,12 +96,15 @@ def main():
     # 6. Warnings and errors (always show level)
     logger.warning('API rate limit at 80%', current=80, limit=100)
 
-    print(f'\n{"=" * 60}')
-    print('Tips:')
-    print('  - Run without flags for clean output')
-    print('  - Add -v for verbose context (_verbose_ keys)')
-    print('  - Add -vv for debug context (_debug_ keys)')
-    print(f'{"=" * 60}\n')
+    footer = dedent("""
+        ============================================================
+        Tips:
+          - Run without flags for clean output
+          - Add -v for verbose context (_verbose_ keys)
+          - Add -vv for debug context (_debug_ keys)
+        ============================================================
+    """)
+    sys.stdout.write(footer)
 
 
 if __name__ == '__main__':

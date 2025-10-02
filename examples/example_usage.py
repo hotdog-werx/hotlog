@@ -1,4 +1,4 @@
-"""hotlog example usage demonstrating three verbosity levels
+"""hotlog example usage demonstrating three verbosity levels.
 
 Run with:
     python example_usage.py           # Level 0: default, minimal output
@@ -7,11 +7,13 @@ Run with:
 """
 
 import argparse
+import sys
+from textwrap import dedent
 
 from hotlog import configure_logging, get_logger
 
 
-def main():
+def main() -> None:
     """Run the usage example."""
     parser = argparse.ArgumentParser(
         description='Usage examples with different verbosity levels',
@@ -31,7 +33,7 @@ def main():
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 
-    print(f'\n=== Running with verbosity level {verbosity} ===\n')
+    sys.stdout.write(f'\n=== Running with verbosity level {verbosity} ===\n')
 
     # Example 1: Basic logging
     logger.info('Starting example application', app_version='1.0.0')
@@ -71,11 +73,14 @@ def main():
         items_processed=100,
     )
 
-    print('\n=== Example completed ===')
-    print('\nTry running with different verbosity levels:')
-    print('  python example_usage.py     # Default (level 0)')
-    print('  python example_usage.py -v  # Verbose (level 1)')
-    print('  python example_usage.py -vv # Debug (level 2)')
+    summary = dedent("""
+        === Example completed ===
+        Try running with different verbosity levels:
+          python example_usage.py     # Default (level 0)
+          python example_usage.py -v  # Verbose (level 1)
+          python example_usage.py -vv # Debug (level 2)
+    """)
+    sys.stdout.write(summary)
 
 
 if __name__ == '__main__':

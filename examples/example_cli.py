@@ -1,4 +1,4 @@
-"""Real-world CLI example using hotlog
+"""Real-world CLI example using hotlog.
 
 Simulates a package manager CLI with different operations and verbosity levels.
 
@@ -12,6 +12,7 @@ import argparse
 import os
 import sys
 import time
+from textwrap import dedent
 
 from hotlog import configure_logging, get_logger, live_logging
 
@@ -24,7 +25,7 @@ def _sleep(seconds: float) -> None:
     time.sleep(seconds)
 
 
-def install_package(package_name: str, logger):
+def install_package(package_name: str, logger) -> None:
     """Simulate installing a package with various logging levels."""
     # Step 1: Resolve dependencies (live)
     with live_logging(f'Resolving dependencies for {package_name}...') as live:
@@ -78,7 +79,7 @@ def install_package(package_name: str, logger):
     )
 
 
-def update_package(package_name: str, logger):
+def update_package(package_name: str, logger) -> None:
     """Simulate updating a package."""
     logger.info(f'Checking for updates to {package_name}')
     _sleep(0.5)
@@ -99,7 +100,7 @@ def update_package(package_name: str, logger):
     logger.info('Update completed', new_version='1.2.0')
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description='Example package manager CLI using hotlog',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -134,7 +135,10 @@ Examples:
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 
-    print(f'\n=== Package Manager (verbosity level: {verbosity}) ===\n')
+    header = dedent(f"""
+        === Package Manager (verbosity level: {verbosity}) ===
+    """)
+    sys.stdout.write(header)
 
     try:
         if args.command == 'install':
@@ -146,7 +150,10 @@ Examples:
             _sleep(0.5)
             logger.info('Package removed successfully')
 
-        print('\n=== Operation completed ===\n')
+        footer = dedent("""
+            === Operation completed ===
+        """)
+        sys.stdout.write(footer)
 
     except Exception as e:
         logger.error('Operation failed', error=str(e), _debug_traceback=True)

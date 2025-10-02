@@ -4,6 +4,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 
+import structlog
 from rich.live import Live
 from structlog.types import FilteringBoundLogger
 
@@ -73,8 +74,6 @@ def live_logging(
         ...         time.sleep(0.5)
         >>> # Live messages disappear here at level 0
     """
-    import structlog
-
     config = get_config()
     base_logger = structlog.get_logger('live')
 

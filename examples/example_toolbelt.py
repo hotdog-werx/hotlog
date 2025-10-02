@@ -1,4 +1,4 @@
-"""Example demonstrating toolbelt-style tool execution logging
+"""Example demonstrating toolbelt-style tool execution logging.
 
 This shows how to log command executions in the format:
     tb[tool-name] => command
@@ -10,11 +10,12 @@ Run with:
 """
 
 import argparse
+import sys
 
 from hotlog import ToolMatch, configure_logging, get_logger
 
 
-def main():
+def main() -> None:
     """Run the toolbelt example."""
     parser = argparse.ArgumentParser(
         description='Toolbelt-style logging example',
@@ -37,7 +38,9 @@ def main():
     )
     logger = get_logger(__name__)
 
-    print(f'\n=== Toolbelt Style Logging (verbosity level: {verbosity}) ===\n')
+    sys.stdout.write(
+        f'\n=== Toolbelt Style Logging (verbosity level: {verbosity}) ===\n',
+    )
 
     # Example 1: Simple tool execution
     logger.info(
@@ -80,7 +83,7 @@ def main():
         _verbose_result='34 files left unchanged',
     )
 
-    print('\n=== Toolbelt example completed ===\n')
+    sys.stdout.write('\n=== Toolbelt example completed ===\n')
 
 
 if __name__ == '__main__':

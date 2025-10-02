@@ -5,7 +5,7 @@ from structlog.typing import EventDict
 
 
 def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
-    """Format the context dictionary as YAML.
+    r"""Format the context dictionary as YAML.
 
     Args:
         event_dict: The context dictionary to format.
@@ -16,7 +16,7 @@ def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
 
     Example:
         >>> format_context_yaml({"count": 42, "name": "test"})
-        '  count: 42\\n  name: test'
+        '  count: 42\n  name: test'
     """
     if not event_dict:
         return ''

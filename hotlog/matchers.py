@@ -84,7 +84,7 @@ class ToolMatch(LogMatcher):
         event: str,
         event_dict: EventDict,
     ) -> str | None:
-        """Format as: prefix[tool] => command
+        """Format as: prefix[tool] => command.
 
         Extracts command and tool from event_dict and formats with Rich markup.
         If no tool name is present, just shows the command.

@@ -1,5 +1,6 @@
 import pytest
 
+from tests.conftest import ExampleRunner
 from tests.test_helpers import CommandTest
 
 
@@ -134,7 +135,7 @@ from tests.test_helpers import CommandTest
     ],
     ids=lambda t: t.description,
 )
-def test_cli_command(run_example_cli, test_case: CommandTest):
+def test_cli_command(run_example_cli: ExampleRunner, test_case: CommandTest):
     """Test example_cli commands at different verbosity levels."""
     result = run_example_cli(test_case.args)
 

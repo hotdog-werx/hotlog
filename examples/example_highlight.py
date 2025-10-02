@@ -1,4 +1,4 @@
-"""Example showing how to highlight important information in messages
+"""Example showing how to highlight important information in messages.
 
 Demonstrates:
 1. Direct Rich markup in messages
@@ -11,12 +11,14 @@ Run with:
 """
 
 import argparse
+import sys
 
 from hotlog import configure_logging, get_logger, highlight
 
 
-def main():
+def main() -> None:
     """Run the highlight example."""
+    display = sys.stdout.write
     parser = argparse.ArgumentParser(
         description='Highlighting examples using hotlog',
     )
@@ -35,7 +37,7 @@ def main():
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 
-    print(f'\n=== Highlighting Examples (verbosity level: {verbosity}) ===\n')
+    display(f'\n=== Highlighting Examples (verbosity level: {verbosity}) ===\n')
 
     # Example 1: Direct Rich markup (simplest)
     logger.info('Installed [bold]5 packages[/bold] in [bold]3ms[/bold]')
@@ -82,9 +84,9 @@ def main():
         ),
     )
 
-    print('\n=== Examples completed ===')
-    print('\nNotice how at level 0, only the summary message appears.')
-    print('At level 1 (-v), you also see the verbose context.')
+    display('\n=== Examples completed ===')
+    display('\nNotice how at level 0, only the summary message appears.')
+    display('At level 1 (-v), you also see the verbose context.')
 
 
 if __name__ == '__main__':

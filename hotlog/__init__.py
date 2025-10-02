@@ -1,4 +1,4 @@
-"""hotlog: Generalized logging utility for Python projects
+"""hotlog: Generalized logging utility for Python projects.
 
 Provides three levels of verbosity:
 - Level 0 (default): Essential info with live updates that can disappear

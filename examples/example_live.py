@@ -1,4 +1,4 @@
-"""hotlog live logging example
+"""hotlog live logging example.
 
 Demonstrates live updates that disappear at verbosity level 0,
 but stay visible at higher levels.
@@ -11,19 +11,21 @@ Run with:
 
 import argparse
 import os
+import sys
 import time
+from textwrap import dedent
 
 from hotlog import configure_logging, get_logger, live_logging
 
 
-def _sleep(seconds):
+def _sleep(seconds: float) -> None:
     """Sleep for the given time, unless HOTLOG_NO_DELAY is set."""
     if os.environ.get('HOTLOG_NO_DELAY'):
         return
     time.sleep(seconds)
 
 
-def main():
+def main() -> None:
     """Run the live logging example."""
     parser = argparse.ArgumentParser(
         description='Live logging example using hotlog',
@@ -43,7 +45,10 @@ def main():
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 
-    print(f'\n=== Running with verbosity level {verbosity} ===\n')
+    header = dedent(f"""
+        === Running with verbosity level {verbosity} ===
+    """)
+    sys.stdout.write(header)
 
     # Example 1: Live logging for a long operation
     with live_logging('Downloading repository...') as live:
@@ -86,9 +91,13 @@ def main():
 
     logger.info('Installation completed with errors')
 
-    print('\n=== Example completed ===')
-    print("\nNotice how at level 0, the 'live' messages disappear,")
-    print('but at level 1 and 2, all messages stay visible.')
+    footer = dedent("""
+        === Example completed ===
+
+        Notice how at level 0, the 'live' messages disappear,
+        but at level 1 and 2, all messages stay visible.
+    """)
+    sys.stdout.write(footer)
 
 
 if __name__ == '__main__':

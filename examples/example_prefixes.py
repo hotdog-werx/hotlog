@@ -1,4 +1,4 @@
-"""Comprehensive example showing prefix filtering and tool execution
+"""Comprehensive example showing prefix filtering and tool execution.
 
 Demonstrates:
 1. How _verbose_ and _debug_ prefixes work automatically
@@ -12,11 +12,13 @@ Run with:
 """
 
 import argparse
+import sys
+from textwrap import dedent
 
 from hotlog import ToolMatch, configure_logging, get_logger
 
 
-def main():
+def main() -> None:
     """Run the prefix filtering example."""
     parser = argparse.ArgumentParser(
         description='Prefix filtering examples using hotlog',
@@ -39,7 +41,10 @@ def main():
     )
     logger = get_logger(__name__)
 
-    print(f'\n=== Prefix Filtering Demo (verbosity level: {verbosity}) ===\n')
+    header = dedent(f"""
+        === Prefix Filtering Demo (verbosity level: {verbosity}) ===
+    """)
+    sys.stdout.write(header)
 
     # Example 1: Basic prefix filtering
     logger.info(
@@ -62,7 +67,10 @@ def main():
         _debug_cache_hit=True,  # Only at -vv
     )
 
-    print('\n=== Tool Execution Pattern Demo ===\n')
+    section_header = dedent("""
+        === Tool Execution Pattern Demo ===
+    """)
+    sys.stdout.write(section_header)
 
     # Example 3: Tool execution - AUTOMATIC formatting
     # Just use event="executing", command="...", tool="..."
@@ -91,23 +99,40 @@ def main():
         _verbose_output='Build successful',
     )
 
-    print('\n=== Summary ===')
-    print(f'\nAt level {verbosity}:')
     if verbosity == 0:
-        print('  - Only base context shown (no _verbose_ or _debug_)')
-        print('  - Tool executions show: pkg[tool] => command')
-    elif verbosity == 1:
-        print('  - Base + _verbose_ context shown')
-        print('  - Tool executions show: pkg[tool] => command')
-        print('  - Plus verbose details')
-    else:
-        print('  - Base + _verbose_ + _debug_ context shown')
-        print('  - Tool executions show: pkg[tool] => command')
-        print('  - Plus all debug details')
+        summary = dedent(f"""
+            === Summary ===
 
-    print(
-        "\nNote: The 'pkg' prefix is customizable via matchers=[ToolMatch(prefix='...')]",
-    )
+            At level {verbosity}:
+              - Only base context shown (no _verbose_ or _debug_)
+              - Tool executions show: pkg[tool] => command
+
+            Note: The 'pkg' prefix is customizable via matchers=[ToolMatch(prefix='...')]
+        """)
+    elif verbosity == 1:
+        summary = dedent(f"""
+            === Summary ===
+
+            At level {verbosity}:
+              - Base + _verbose_ context shown
+              - Tool executions show: pkg[tool] => command
+              - Plus verbose details
+
+            Note: The 'pkg' prefix is customizable via matchers=[ToolMatch(prefix='...')]
+        """)
+    else:
+        summary = dedent(f"""
+            === Summary ===
+
+            At level {verbosity}:
+              - Base + _verbose_ + _debug_ context shown
+              - Tool executions show: pkg[tool] => command
+              - Plus all debug details
+
+            Note: The 'pkg' prefix is customizable via matchers=[ToolMatch(prefix='...')]
+        """)
+
+    sys.stdout.write(summary)
 
 
 if __name__ == '__main__':

@@ -14,6 +14,15 @@ import pytest
 from pydantic import BaseModel
 from pytest_mock import MockerFixture
 
+from examples.example_cli import main as main_cli
+from examples.example_custom_matcher import main as main_custom_matcher
+from examples.example_highlight import main as main_highlight
+from examples.example_live import main as main_live
+from examples.example_prefixes import main as main_prefixes
+from examples.example_quickstart import main as main_quickstart
+from examples.example_toolbelt import main as main_toolbelt
+from examples.example_usage import main as main_usage
+
 
 def strip_ansi(text: str) -> str:
     """Remove ANSI color codes and Rich formatting from text."""
@@ -111,12 +120,11 @@ def run_example_cli(
         result = run_example_cli(["install", "mypackage"])
         assert "Dependencies resolved" in result.clean_output
     """
-    from examples.example_cli import main
 
     def _run(args: list[str]) -> Result:
         ctx = RunExampleContext(
             example_name='example_cli.py',
-            main_func=main,
+            main_func=main_cli,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -142,11 +150,9 @@ def run_example_toolbelt(
 
     # Import will be dynamic since we need to handle different verbosity levels
     def _run(args: list[str]) -> Result:
-        from examples.example_toolbelt import main
-
         ctx = RunExampleContext(
             example_name='example_toolbelt.py',
-            main_func=main,
+            main_func=main_toolbelt,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -166,11 +172,9 @@ def run_example_custom_matcher(
     """Fixture to run example_custom_matcher.py with captured output."""
 
     def _run(args: list[str]) -> Result:
-        from examples.example_custom_matcher import main
-
         ctx = RunExampleContext(
             example_name='example_custom_matcher.py',
-            main_func=main,
+            main_func=main_custom_matcher,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -190,11 +194,9 @@ def run_example_highlight(
     """Fixture to run example_highlight.py with captured output."""
 
     def _run(args: list[str] | None = None) -> Result:
-        from examples.example_highlight import main
-
         ctx = RunExampleContext(
             example_name='example_highlight.py',
-            main_func=main,
+            main_func=main_highlight,
             args=args or [],
             cwd=tmp_path,
             capsys=capsys,
@@ -214,11 +216,9 @@ def run_example_live(
     """Fixture to run example_live.py with captured output."""
 
     def _run(args: list[str]) -> Result:
-        from examples.example_live import main
-
         ctx = RunExampleContext(
             example_name='example_live.py',
-            main_func=main,
+            main_func=main_live,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -238,11 +238,9 @@ def run_example_prefixes(
     """Fixture to run example_prefixes.py with captured output."""
 
     def _run(args: list[str]) -> Result:
-        from examples.example_prefixes import main
-
         ctx = RunExampleContext(
             example_name='example_prefixes.py',
-            main_func=main,
+            main_func=main_prefixes,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -262,11 +260,9 @@ def run_example_usage(
     """Fixture to run example_usage.py with captured output."""
 
     def _run(args: list[str]) -> Result:
-        from examples.example_usage import main
-
         ctx = RunExampleContext(
             example_name='example_usage.py',
-            main_func=main,
+            main_func=main_usage,
             args=args,
             cwd=tmp_path,
             capsys=capsys,
@@ -286,11 +282,9 @@ def run_example_quickstart(
     """Fixture to run example_quickstart.py with captured output."""
 
     def _run(args: list[str]) -> Result:
-        from examples.example_quickstart import main
-
         ctx = RunExampleContext(
             example_name='example_quickstart.py',
-            main_func=main,
+            main_func=main_quickstart,
             args=args,
             cwd=tmp_path,
             capsys=capsys,

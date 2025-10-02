@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from .conftest import Result
+
 
 @dataclass
 class CommandTest:
@@ -27,7 +29,8 @@ class CommandTest:
     description: str = ''
     should_fail: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Ensure should_not_contain is a list."""
         if self.should_not_contain is None:
             self.should_not_contain = []
 
@@ -62,7 +65,8 @@ class OutputExpectation:
     description: str = ''
     should_fail: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Ensure should_not_contain is a list."""
         if self.should_not_contain is None:
             self.should_not_contain = []
 
@@ -73,7 +77,7 @@ class OutputExpectation:
         return min(v_count, 2)  # Cap at 2
 
 
-def verify_output(result, expectation: OutputExpectation) -> None:
+def verify_output(result: Result, expectation: OutputExpectation) -> None:
     """Verify that result matches expectation.
 
     Args:

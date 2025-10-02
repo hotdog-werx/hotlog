@@ -13,7 +13,13 @@ Run with:
 import argparse
 import sys
 
-from hotlog import configure_logging, get_logger, highlight
+from hotlog import (
+    add_verbosity_argument,
+    configure_logging,
+    get_logger,
+    highlight,
+    resolve_verbosity,
+)
 
 
 def main() -> None:
@@ -22,16 +28,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Highlighting examples using hotlog',
     )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='Increase verbosity',
-    )
+    add_verbosity_argument(parser)
     args = parser.parse_args()
 
-    verbosity = args.verbose
+    verbosity = resolve_verbosity(args)
 
     # Configure logging
     configure_logging(verbosity=verbosity)

@@ -6,10 +6,21 @@ Provides three levels of verbosity:
 - Level 2 (-vv): All debug messages, no live updates
 
 Usage:
-    from hotlog import get_logger, configure_logging, ToolMatch
+    from hotlog import (
+        add_verbosity_argument,
+        configure_logging,
+        get_logger,
+        resolve_verbosity,
+        ToolMatch,
+    )
+
+    # In your CLI
+    parser = argparse.ArgumentParser()
+    add_verbosity_argument(parser)
+    args = parser.parse_args()
 
     configure_logging(
-        verbosity=0,
+        verbosity=resolve_verbosity(args),
         matchers=[
             ToolMatch(event="executing", prefix="tb")
         ]
@@ -24,10 +35,15 @@ import structlog
 
 # Import from refactored modules
 from hotlog.config import get_config
-from hotlog.live import live_logging
+from hotlog.live import LiveLogger, live_logging
 from hotlog.logger import get_logger, highlight
 from hotlog.matchers import LogMatcher, ToolMatch
 from hotlog.rendering import cli_renderer
+from hotlog.verbosity import (
+    add_verbosity_argument,
+    get_verbosity_from_env,
+    resolve_verbosity,
+)
 
 # Type alias for backward compatibility
 Logger = structlog.types.FilteringBoundLogger
@@ -81,11 +97,15 @@ def configure_logging(
 
 # Public API
 __all__ = [
+    'LiveLogger',
     'LogMatcher',
     'Logger',
     'ToolMatch',
+    'add_verbosity_argument',
     'configure_logging',
     'get_logger',
+    'get_verbosity_from_env',
     'highlight',
     'live_logging',
+    'resolve_verbosity',
 ]

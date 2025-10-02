@@ -62,6 +62,52 @@ class RunExampleContext:
     mocker: MockerFixture
 
 
+# Env vars that could interfere with verbosity tests
+_VERBOSITY_ENV_VARS = [
+    'HOTLOG_VERBOSITY',
+    'CI',
+    'GITHUB_ACTIONS',
+    'GITLAB_CI',
+    'CIRCLECI',
+    'TRAVIS',
+    'JENKINS_HOME',
+    'BUILDKITE',
+    'RUNNER_DEBUG',
+    'ACTIONS_RUNNER_DEBUG',
+]
+
+
+def _save_environment() -> tuple[dict[str, str | None], str | None]:
+    """Save current environment state."""
+    verbosity_env = {var: os.environ.get(var) for var in _VERBOSITY_ENV_VARS}
+    no_delay = os.environ.get('HOTLOG_NO_DELAY')
+    return verbosity_env, no_delay
+
+
+def _setup_test_environment() -> None:
+    """Configure environment for test execution."""
+    os.environ['HOTLOG_NO_DELAY'] = '1'
+    for var in _VERBOSITY_ENV_VARS:
+        os.environ.pop(var, None)
+
+
+def _restore_environment(
+    verbosity_env: dict[str, str | None],
+    no_delay: str | None,
+) -> None:
+    """Restore environment to previous state."""
+    if no_delay is None:
+        os.environ.pop('HOTLOG_NO_DELAY', None)
+    else:
+        os.environ['HOTLOG_NO_DELAY'] = no_delay
+
+    for var, value in verbosity_env.items():
+        if value is None:
+            os.environ.pop(var, None)
+        else:
+            os.environ[var] = value
+
+
 def _run_example(ctx: RunExampleContext) -> Result:
     """Execute an example's main function with captured output.
 
@@ -69,12 +115,10 @@ def _run_example(ctx: RunExampleContext) -> Result:
     """
     old_cwd = Path.cwd()
     old_argv = sys.argv.copy()
-    old_env = os.environ.get('HOTLOG_NO_DELAY')
+    verbosity_env, no_delay = _save_environment()
 
     try:
-        # Set environment variable to skip time.sleep() in examples
-        os.environ['HOTLOG_NO_DELAY'] = '1'
-
+        _setup_test_environment()
         os.chdir(ctx.cwd)
         sys.argv = [ctx.example_name, *ctx.args]
 
@@ -86,22 +130,15 @@ def _run_example(ctx: RunExampleContext) -> Result:
             exit_code = exit_code if exit_code is not None else 0
 
         captured = ctx.capsys.readouterr()
-        stdout = captured.out
-        stderr = captured.err
-
         return Result(
             returncode=exit_code,
-            stdout=stdout,
-            stderr=stderr,
+            stdout=captured.out,
+            stderr=captured.err,
         )
     finally:
         os.chdir(old_cwd)
         sys.argv = old_argv
-        # Restore old environment variable
-        if old_env is None:
-            os.environ.pop('HOTLOG_NO_DELAY', None)
-        else:
-            os.environ['HOTLOG_NO_DELAY'] = old_env
+        _restore_environment(verbosity_env, no_delay)
 
 
 # Type alias for example runner functions

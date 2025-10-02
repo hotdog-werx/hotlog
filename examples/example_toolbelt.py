@@ -12,7 +12,13 @@ Run with:
 import argparse
 import sys
 
-from hotlog import ToolMatch, configure_logging, get_logger
+from hotlog import (
+    ToolMatch,
+    add_verbosity_argument,
+    configure_logging,
+    get_logger,
+    resolve_verbosity,
+)
 
 
 def main() -> None:
@@ -20,16 +26,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Toolbelt-style logging example',
     )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='Increase verbosity (-v for verbose, -vv for debug)',
-    )
+    add_verbosity_argument(parser)
     args = parser.parse_args()
 
-    verbosity = min(args.verbose, 2)
+    verbosity = resolve_verbosity(args)
 
     # Configure logging with ToolMatch matcher
     configure_logging(

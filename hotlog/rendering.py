@@ -166,7 +166,11 @@ def cli_renderer(
     context_yaml = format_context_yaml(event_dict)
 
     # Check if we should buffer this message (live context at level 0)
-    if handle_live_buffering(log_msg, context_yaml, is_live_message=is_live_message):
+    if handle_live_buffering(
+        log_msg,
+        context_yaml,
+        is_live_message=is_live_message,
+    ):
         # Message was buffered, don't print
         return ''
 

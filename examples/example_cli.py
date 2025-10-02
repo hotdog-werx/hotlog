@@ -16,7 +16,13 @@ from textwrap import dedent
 
 from structlog.typing import FilteringBoundLogger
 
-from hotlog import configure_logging, get_logger, live_logging
+from hotlog import (
+    add_verbosity_argument,
+    configure_logging,
+    get_logger,
+    live_logging,
+    resolve_verbosity,
+)
 
 
 # Helper to make sleep time configurable (useful for tests)
@@ -115,13 +121,8 @@ Examples:
         """,
     )
 
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='Increase verbosity (-v for verbose, -vv for debug)',
-    )
+    # Use hotlog's helper to add verbosity argument
+    add_verbosity_argument(parser)
 
     parser.add_argument(
         'command',
@@ -133,8 +134,8 @@ Examples:
 
     args = parser.parse_args()
 
-    # Configure logging based on verbosity
-    verbosity = min(args.verbose, 2)
+    # Resolve verbosity from CLI args and environment (CI detection)
+    verbosity = resolve_verbosity(args)
     configure_logging(verbosity=verbosity)
     logger = get_logger(__name__)
 

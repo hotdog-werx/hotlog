@@ -10,6 +10,20 @@ from hotlog.verbosity import (
     resolve_verbosity,
 )
 
+# All environment variables that could affect verbosity detection
+ALL_VERBOSITY_ENV_VARS = [
+    'HOTLOG_VERBOSITY',
+    'RUNNER_DEBUG',
+    'ACTIONS_RUNNER_DEBUG',
+    'CI',
+    'GITHUB_ACTIONS',
+    'GITLAB_CI',
+    'CIRCLECI',
+    'TRAVIS',
+    'JENKINS_HOME',
+    'BUILDKITE',
+]
+
 
 @pytest.mark.parametrize(
     ('args', 'expected_verbose'),
@@ -68,19 +82,7 @@ def test_get_verbosity_from_env(
 ) -> None:
     """Test environment variable detection for verbosity levels."""
     # Clear all relevant env vars first
-    all_vars = [
-        'HOTLOG_VERBOSITY',
-        'RUNNER_DEBUG',
-        'ACTIONS_RUNNER_DEBUG',
-        'CI',
-        'GITHUB_ACTIONS',
-        'GITLAB_CI',
-        'CIRCLECI',
-        'TRAVIS',
-        'JENKINS_HOME',
-        'BUILDKITE',
-    ]
-    for var in all_vars:
+    for var in ALL_VERBOSITY_ENV_VARS:
         monkeypatch.delenv(var, raising=False)
 
     # Set test environment variables
@@ -120,13 +122,8 @@ def test_resolve_verbosity(
     expected_verbosity: int,
 ) -> None:
     """Test verbosity resolution from CLI args and environment."""
-    # Clear env vars
-    for var in [
-        'HOTLOG_VERBOSITY',
-        'CI',
-        'RUNNER_DEBUG',
-        'ACTIONS_RUNNER_DEBUG',
-    ]:
+    # Clear all verbosity-related env vars
+    for var in ALL_VERBOSITY_ENV_VARS:
         monkeypatch.delenv(var, raising=False)
 
     # Set test environment
@@ -146,8 +143,8 @@ def test_resolve_verbosity(
 
 def test_full_workflow_with_parser(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test complete workflow from parser setup to verbosity resolution."""
-    # Clear environment
-    for var in ['CI', 'RUNNER_DEBUG', 'HOTLOG_VERBOSITY']:
+    # Clear all CI-related environment variables
+    for var in ALL_VERBOSITY_ENV_VARS:
         monkeypatch.delenv(var, raising=False)
 
     parser = argparse.ArgumentParser()
@@ -160,6 +157,10 @@ def test_full_workflow_with_parser(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_ci_auto_detection(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test CI is auto-detected when no CLI args provided."""
+    # Clear all CI vars first
+    for var in ALL_VERBOSITY_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+
     monkeypatch.setenv('GITHUB_ACTIONS', 'true')
 
     parser = argparse.ArgumentParser()
@@ -174,6 +175,10 @@ def test_cli_and_env_combined_takes_max(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Test that maximum of CLI and env is used."""
+    # Clear all CI vars first
+    for var in ALL_VERBOSITY_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+
     monkeypatch.setenv('CI', 'true')  # Would give 1
 
     parser = argparse.ArgumentParser()

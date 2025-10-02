@@ -1,5 +1,3 @@
-"""Parametrized tests for example_highlight.py"""
-
 import pytest
 
 from tests.conftest import ExampleRunner

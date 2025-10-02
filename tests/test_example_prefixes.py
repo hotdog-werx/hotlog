@@ -1,5 +1,3 @@
-"""Parametrized tests for example_prefixes.py"""
-
 import pytest
 
 from tests.conftest import ExampleRunner

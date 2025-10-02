@@ -1,5 +1,3 @@
-"""Parametrized tests for example_cli.py"""
-
 import pytest
 
 from tests.test_helpers import CommandTest

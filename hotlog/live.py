@@ -7,12 +7,7 @@ from typing import Any
 from rich.live import Live
 from structlog.types import FilteringBoundLogger
 
-from hotlog.config import (
-    clear_live_messages,
-    get_console,
-    get_verbosity_level,
-    set_live_context,
-)
+from hotlog.config import get_config, get_console
 
 
 class LiveLogger:
@@ -80,26 +75,26 @@ def live_logging(
     """
     import structlog
 
-    verbosity_level = get_verbosity_level()
+    config = get_config()
     base_logger = structlog.get_logger('live')
 
-    if verbosity_level == 0:
+    if config.verbosity_level == 0:
         # Level 0: Use Rich Live display for ephemeral messages
         console = get_console()
-        clear_live_messages()  # Clear message buffer
+        config.clear_live_messages()  # Clear message buffer
         with Live(
             f'[bold blue]{message}[/bold blue]',
             console=console,
             refresh_per_second=10,
             transient=True,  # Makes the live display disappear when done!
         ) as live:
-            set_live_context(live)
+            config.live_context = live
             try:
                 yield LiveLogger(base_logger)
             finally:
                 # Clean up: clear the live context and buffered messages
-                set_live_context(None)
-                clear_live_messages()
+                config.live_context = None
+                config.clear_live_messages()
     else:
         # Level 1+: Just print header and messages normally (not ephemeral)
         console = get_console()

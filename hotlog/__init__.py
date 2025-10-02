@@ -23,7 +23,7 @@ from collections.abc import Callable
 import structlog
 
 # Import from refactored modules
-from hotlog.config import set_matchers, set_verbosity_level
+from hotlog.config import get_config
 from hotlog.live import live_logging
 from hotlog.logger import get_logger, highlight
 from hotlog.matchers import LogMatcher, ToolMatch
@@ -50,8 +50,9 @@ def configure_logging(
                  Example: [ToolMatch(event="executing", prefix="tb")]
     """
     # Update global state
-    set_verbosity_level(verbosity)
-    set_matchers(matchers or [])
+    config = get_config()
+    config.verbosity_level = verbosity
+    config.matchers = matchers or []
 
     chosen_renderer = renderer or cli_renderer
 

@@ -20,8 +20,7 @@ def strip_ansi(text: str) -> str:
     # Remove ANSI escape sequences
     text = re.sub(r'\x1b\[[0-9;]*m', '', text)
     # Remove Rich markup tags like [bold], [/bold], [blue], etc.
-    text = re.sub(r'\[/?[a-z#0-9 ]+\]', '', text)
-    return text
+    return re.sub(r'\[/?[a-z#0-9 ]+\]', '', text)
 
 
 class Result(BaseModel):

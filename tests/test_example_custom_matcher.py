@@ -1,5 +1,3 @@
-"""Parametrized tests for example_custom_matcher.py"""
-
 import pytest
 
 from tests.conftest import ExampleRunner

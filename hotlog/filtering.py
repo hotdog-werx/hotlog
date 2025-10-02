@@ -2,7 +2,7 @@
 
 from structlog.typing import EventDict
 
-from hotlog.config import DEFAULT_PREFIXES, get_verbosity_level
+from hotlog.config import DEFAULT_PREFIXES, get_config
 
 
 def _should_filter_key(key: str, verbosity_level: int) -> bool:
@@ -40,13 +40,13 @@ def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
     Returns:
         Filtered dictionary based on current verbosity level
     """
-    verbosity_level = get_verbosity_level()
+    config = get_config()
 
-    if verbosity_level >= 2:
+    if config.verbosity_level >= 2:
         # Debug mode: show everything
         return event_dict
 
-    return {key: value for key, value in event_dict.items() if not _should_filter_key(key, verbosity_level)}
+    return {key: value for key, value in event_dict.items() if not _should_filter_key(key, config.verbosity_level)}
 
 
 def strip_prefixes_from_keys(event_dict: EventDict) -> EventDict:

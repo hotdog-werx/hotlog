@@ -1,5 +1,3 @@
-"""Parametrized tests for example_quickstart.py"""
-
 import pytest
 
 from tests.conftest import ExampleRunner

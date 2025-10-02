@@ -4,14 +4,7 @@ from rich.syntax import Syntax
 from structlog.types import FilteringBoundLogger
 from structlog.typing import EventDict
 
-from hotlog.config import (
-    append_live_message,
-    get_console,
-    get_live_context,
-    get_live_messages,
-    get_matchers,
-    get_verbosity_level,
-)
+from hotlog.config import get_config, get_console
 from hotlog.filtering import filter_context_by_prefix, strip_prefixes_from_keys
 from hotlog.formatting import (
     format_context_yaml,
@@ -37,8 +30,8 @@ def apply_matchers(
     Returns:
         Formatted message string if a matcher handled it, None otherwise
     """
-    matchers = get_matchers()
-    for matcher in matchers:
+    config = get_config()
+    for matcher in config.matchers:
         if matcher.matches(level, event_msg, event_dict):
             formatted = matcher.format(level, event_msg, event_dict)
             if formatted is not None:
@@ -83,19 +76,17 @@ def handle_live_buffering(
     Returns:
         True if message was buffered (don't print), False if should print normally
     """
-    live_context = get_live_context()
-    verbosity_level = get_verbosity_level()
+    config = get_config()
 
-    if not (is_live_message and live_context is not None and verbosity_level == 0):
+    if not (is_live_message and config.live_context is not None and config.verbosity_level == 0):
         return False  # Should print normally
 
     # At level 0 with live context: buffer messages
-    append_live_message(log_msg, context_yaml)
+    config.append_live_message(log_msg, context_yaml)
 
     # Update live display to show buffered messages
-    live_messages = get_live_messages()
-    if live_messages:
-        live_context.update(_format_live_display(live_messages))
+    if config.live_messages:
+        config.live_context.update(_format_live_display(config.live_messages))
 
     return True  # Message was buffered
 

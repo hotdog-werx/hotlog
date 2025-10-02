@@ -5,6 +5,26 @@ from structlog.typing import EventDict
 from hotlog.config import DEFAULT_PREFIXES, get_verbosity_level
 
 
+def _should_filter_key(key: str, verbosity_level: int) -> bool:
+    """Check if a key should be filtered based on verbosity level.
+
+    Note: This is only called for verbosity levels 0 and 1.
+    Level 2+ returns early without filtering.
+
+    Args:
+        key: The dictionary key to check
+        verbosity_level: Current verbosity level (0 or 1)
+
+    Returns:
+        True if the key should be filtered out, False to keep it
+    """
+    if verbosity_level == 0:
+        # Default mode: filter out _verbose_ and _debug_
+        return key.startswith('_verbose_') or key.startswith('_debug_')
+    # Verbose mode (level 1): only filter out _debug_
+    return key.startswith('_debug_')
+
+
 def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
     """Filter context dictionary based on key prefixes and verbosity level.
 
@@ -26,20 +46,7 @@ def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
         # Debug mode: show everything
         return event_dict
 
-    filtered_dict = {}
-    for key, value in event_dict.items():
-        if verbosity_level == 0:
-            # Default mode: filter out _verbose_ and _debug_
-            if key.startswith('_verbose_') or key.startswith('_debug_'):
-                continue
-        elif verbosity_level == 1:
-            # Verbose mode: only filter out _debug_
-            if key.startswith('_debug_'):
-                continue
-
-        filtered_dict[key] = value
-
-    return filtered_dict
+    return {key: value for key, value in event_dict.items() if not _should_filter_key(key, verbosity_level)}
 
 
 def strip_prefixes_from_keys(event_dict: EventDict) -> EventDict:

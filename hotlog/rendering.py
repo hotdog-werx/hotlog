@@ -46,6 +46,25 @@ def apply_matchers(
     return None
 
 
+def _format_live_display(live_messages: list[tuple[str, str]]) -> str:
+    """Format live messages for display.
+
+    Args:
+        live_messages: List of (message, context) tuples
+
+    Returns:
+        Formatted string with messages and indented context
+    """
+    display_lines = []
+    for msg, ctx in live_messages:
+        display_lines.append(msg)
+        if ctx:
+            # Indent context for better readability
+            for line in ctx.split('\n'):
+                display_lines.append(f'  {line}')
+    return '\n'.join(display_lines)
+
+
 def handle_live_buffering(
     log_msg: str,
     context_yaml: str,
@@ -67,25 +86,18 @@ def handle_live_buffering(
     live_context = get_live_context()
     verbosity_level = get_verbosity_level()
 
-    if is_live_message and live_context is not None and verbosity_level == 0:
-        # At level 0 with live context: buffer messages
-        append_live_message(log_msg, context_yaml)
+    if not (is_live_message and live_context is not None and verbosity_level == 0):
+        return False  # Should print normally
 
-        # Update live display to show buffered messages
-        live_messages = get_live_messages()
-        if live_messages:
-            display_lines = []
-            for msg, ctx in live_messages:
-                display_lines.append(msg)
-                if ctx:
-                    # Indent context for better readability
-                    for line in ctx.split('\n'):
-                        display_lines.append(f'  {line}')
-            live_context.update('\n'.join(display_lines))
+    # At level 0 with live context: buffer messages
+    append_live_message(log_msg, context_yaml)
 
-        return True  # Message was buffered
+    # Update live display to show buffered messages
+    live_messages = get_live_messages()
+    if live_messages:
+        live_context.update(_format_live_display(live_messages))
 
-    return False  # Should print normally
+    return True  # Message was buffered
 
 
 def render_output(log_msg: str, context_yaml: str) -> None:

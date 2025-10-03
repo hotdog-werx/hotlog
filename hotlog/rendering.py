@@ -135,8 +135,23 @@ def cli_renderer(
     Returns:
         str: An empty string, as structlog expects a string return but output is printed.
     """
+    config = get_config()
     level = method_name.upper()
     event_msg = event_dict.pop('event', '')
+
+    # Optional display level gating (_display_level: 0,1,2)
+    required_display_level = None
+    display_raw = event_dict.pop('_display_level', None)
+    if display_raw is not None:
+        try:
+            required_display_level = int(display_raw)
+        except (TypeError, ValueError):
+            required_display_level = None
+        else:
+            required_display_level = max(0, min(2, required_display_level))
+
+    if required_display_level is not None and config.verbosity_level < required_display_level:
+        return ''
 
     # Check if this is a live message (should be buffered at level 0)
     is_live_message = event_dict.pop('_live_', False)

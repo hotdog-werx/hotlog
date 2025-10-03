@@ -48,6 +48,24 @@ logger.info(
 **No special configuration needed** - just prefix your keys and hotlog handles
 the rest!
 
+### Visibility Gating with `_display_level`
+
+Sometimes you want to hide entire events unless the user explicitly opts into
+higher verbosity. Add `_display_level` to the event context to specify the
+minimum verbosity (0, 1, or 2) required to display it:
+
+```python
+logger.info("download_entry_start", entry=item.name, _display_level=1)
+```
+
+- Messages log as normal when the active verbosity (set via `configure_logging`
+  or environment detection) is **at least** `_display_level`.
+- When the required level is higher than the active verbosity, the event is
+  skipped entirely. The key is removed before rendering, so it never appears in
+  the formatted output.
+- `_display_level` complements `_verbose_*`/`_debug_*` prefixes—use it to gate
+  whole events, while prefixes still gate individual context values.
+
 ### Custom Log Matchers
 
 Configure custom formatting rules for specific log patterns using matchers.
@@ -196,6 +214,23 @@ with live_logging("Downloading..."):
     # Your operation here
     logger.info("Connected", host="example.com")
 ```
+
+### Conditional Live Logging Helper
+
+When you only want live updates at verbosity 0, use
+`maybe_live_logging(message)`:
+
+```python
+from hotlog import maybe_live_logging
+
+with maybe_live_logging("Downloading repos...") as live:
+        if live:
+                live.info("Downloading", name=repo)
+```
+
+- At verbosity 0, it delegates to `live_logging()` and yields a `LiveLogger`.
+- At verbosity 1 or 2, it yields `None` without printing anything, so you can
+  skip live output and avoid extra branching in your code.
 
 ## Usage
 

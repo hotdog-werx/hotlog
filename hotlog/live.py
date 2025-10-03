@@ -99,3 +99,23 @@ def live_logging(
         console = get_console()
         console.print(f'[bold blue]{message}[/bold blue]')
         yield LiveLogger(base_logger)
+
+
+@contextmanager
+def maybe_live_logging(
+    message: str,
+) -> Generator[LiveLogger | None, None, None]:
+    """Provide a live logging context only when verbosity is 0.
+
+    Args:
+        message: Status message to display if live logging is active.
+
+    Yields:
+        LiveLogger when verbosity is 0, otherwise None for a no-op context.
+    """
+    config = get_config()
+    if config.verbosity_level == 0:
+        with live_logging(message) as live:
+            yield live
+    else:
+        yield None

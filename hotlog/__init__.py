@@ -35,7 +35,7 @@ import structlog
 
 # Import from refactored modules
 from hotlog.config import get_config
-from hotlog.live import LiveLogger, live_logging
+from hotlog.live import LiveLogger, live_logging, maybe_live_logging
 from hotlog.logger import get_logger, highlight
 from hotlog.matchers import LogMatcher, ToolMatch
 from hotlog.rendering import cli_renderer
@@ -107,5 +107,6 @@ __all__ = [
     'get_verbosity_from_env',
     'highlight',
     'live_logging',
+    'maybe_live_logging',
     'resolve_verbosity',
 ]

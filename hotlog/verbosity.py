@@ -8,6 +8,22 @@ if TYPE_CHECKING:
     from argparse import ArgumentParser
 
 
+def is_env_var_true(name: str) -> bool:
+    """Return True if the environment variable named ``name`` represents truth.
+
+    The function reads the value from ``os.environ`` and accepts common truthy
+    strings (case-insensitive): '1', 'true', 'yes', 'on', 'y', 't'. Any other
+    value (including missing or empty) returns False.
+    """
+    if not name:
+        return False
+    val = os.environ.get(name)
+    if not val:
+        return False
+    v = val.strip().lower()
+    return v in ('1', 'true', 'yes', 'on', 'y', 't')
+
+
 def add_verbosity_argument(parser: 'ArgumentParser') -> None:
     """Add standard verbosity argument to an argparse parser.
 
@@ -67,7 +83,9 @@ def get_verbosity_from_env() -> int:
             pass
 
     # GitHub Actions debug mode
-    if os.environ.get('RUNNER_DEBUG') == '1' or os.environ.get('ACTIONS_RUNNER_DEBUG') == 'true':
+    if is_env_var_true('RUNNER_DEBUG') or is_env_var_true(
+        'ACTIONS_RUNNER_DEBUG',
+    ):
         return 2
 
     # CI environment detection (various CI platforms)
@@ -80,7 +98,14 @@ def get_verbosity_from_env() -> int:
         'JENKINS_HOME',
         'BUILDKITE',
     ]
-    if any(os.environ.get(var) for var in ci_vars):
+
+    def _ci_var_is_true(var: str) -> bool:
+        # Jenkins uses a path in JENKINS_HOME; treat any non-empty value as true
+        if var == 'JENKINS_HOME':
+            return bool(os.environ.get(var))
+        return is_env_var_true(var)
+
+    if any(_ci_var_is_true(var) for var in ci_vars):
         return 1
 
     # Default: no verbosity

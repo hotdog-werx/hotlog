@@ -92,6 +92,24 @@ verbosity = resolve_verbosity(args)
 | `JENKINS_HOME`              | Jenkins detected (level 1)            |
 | `BUILDKITE=true`            | Buildkite detected (level 1)          |
 
+## Environment truthiness and `is_env_var_true()`
+
+Hotlog normalizes boolean environment detection using an internal helper
+`is_env_var_true(name)`. The helper reads the named environment variable and
+treats the following (case-insensitive) values as true:
+
+- `1`, `true`, `yes`, `on`, `y`, `t`
+
+Missing or empty values, or common falsey strings like `0`, `false`, or `no` are
+treated as false. This prevents accidental detection when a variable is present
+but explicitly set to `false` (for example `CI=false`).
+
+Special-case: `JENKINS_HOME` is usually set to a filesystem path by Jenkins, so
+Hotlog treats any non-empty `JENKINS_HOME` value as indicating a CI environment.
+
+If you want Hotlog to accept additional truthy tokens (for example `enabled`),
+open an issue and we can consider adding them.
+
 ## Examples
 
 ### Basic CLI Usage

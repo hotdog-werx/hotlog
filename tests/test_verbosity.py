@@ -7,6 +7,8 @@ import pytest
 from hotlog.verbosity import (
     add_verbosity_argument,
     get_verbosity_from_env,
+    # helper to test truthiness parsing
+    is_env_var_true,
     resolve_verbosity,
 )
 
@@ -90,6 +92,51 @@ def test_get_verbosity_from_env(
         monkeypatch.setenv(var, value)
 
     assert get_verbosity_from_env() == expected_verbosity
+
+
+@pytest.mark.parametrize(
+    ('value', 'expected'),
+    [
+        (None, False),
+        ('', False),
+        ('0', False),
+        ('false', False),
+        ('False', False),
+        ('no', False),
+        ('1', True),
+        ('true', True),
+        ('True', True),
+        ('yes', True),
+        ('on', True),
+    ],
+)
+def test_is_env_var_true(
+    monkeypatch: pytest.MonkeyPatch,
+    value: str | None,
+    *,
+    expected: bool,
+) -> None:
+    """is_env_var_true should correctly identify truthy and falsey values.
+
+    We set a temporary environment variable named TEST_IS_ENV and then call
+    is_env_var_true with the variable name.
+    """
+    # Ensure the var is unset first
+    monkeypatch.delenv('TEST_IS_ENV', raising=False)
+    if value is not None:
+        monkeypatch.setenv('TEST_IS_ENV', value)
+
+    assert is_env_var_true('TEST_IS_ENV') is expected
+
+
+def test_false_ci_does_not_count(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure CI='false' (or similar) does not count as a CI environment."""
+    for var in ALL_VERBOSITY_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+
+    monkeypatch.setenv('CI', 'false')
+    assert is_env_var_true('') is False
+    assert get_verbosity_from_env() == 0
 
 
 @pytest.mark.parametrize(

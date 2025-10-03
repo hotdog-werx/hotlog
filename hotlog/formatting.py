@@ -53,7 +53,7 @@ def format_log_message(level: str, event_msg: str) -> str:
     """Format a log message with appropriate styling based on level.
 
     Args:
-        level: Log level (INFO, WARNING, ERROR, DEBUG, etc.)
+        level: Log level (INFO, WARNING, ERROR, DEBUG, EXCEPTION, etc.)
         event_msg: The message text
 
     Returns:
@@ -64,6 +64,8 @@ def format_log_message(level: str, event_msg: str) -> str:
         '[blue]Processing data[/blue]'
         >>> format_log_message("ERROR", "Failed to connect")
         '[bold red]ERROR:[/bold red] [red]Failed to connect[/red]'
+        >>> format_log_message("EXCEPTION", "Operation failed")
+        '[bold red]EXCEPTION:[/bold red] [red]Operation failed[/red]'
     """
     # Map log levels to colors/styles
     level_styles = {
@@ -73,6 +75,7 @@ def format_log_message(level: str, event_msg: str) -> str:
         'DEBUG': 'magenta',
         'CRITICAL': 'white on red',
         'SUCCESS': 'green',
+        'EXCEPTION': 'red',  # Same style as ERROR
     }
 
     # Pick style, fallback to bold cyan for unknown
@@ -82,8 +85,8 @@ def format_log_message(level: str, event_msg: str) -> str:
     if level == 'DEBUG':
         # Show DEBUG prefix only in debug mode
         return f'[{style}]DEBUG[/{style}] [{style}]{event_msg}[/{style}]'
-    if level in ('WARNING', 'ERROR', 'CRITICAL'):
-        # Show level for warnings and errors (important)
+    if level in ('WARNING', 'ERROR', 'CRITICAL', 'EXCEPTION'):
+        # Show level for warnings, errors, exceptions (important)
         return f'[bold {style}]{level}:[/bold {style}] [{style}]{event_msg}[/{style}]'
     # INFO and SUCCESS: no prefix, just the message
     return f'[{style}]{event_msg}[/{style}]'

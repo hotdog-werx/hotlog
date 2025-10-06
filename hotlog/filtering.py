@@ -1,5 +1,7 @@
 """Context filtering based on verbosity level and key prefixes."""
 
+from typing import cast
+
 from structlog.typing import EventDict
 
 from hotlog.config import DEFAULT_PREFIXES, get_config
@@ -49,11 +51,38 @@ def filter_context_by_prefix(event_dict: EventDict) -> EventDict:
     return {key: value for key, value in event_dict.items() if not _should_filter_key(key, config.verbosity_level)}
 
 
+def _strip_prefix_from_key(raw_key: str, prefixes: tuple[str, ...]) -> str:
+    for prefix in prefixes:
+        if raw_key.startswith(prefix):
+            stripped = raw_key.removeprefix(prefix)
+            return stripped or raw_key
+    return raw_key
+
+
+def _strip_prefixes(value: object, prefixes: tuple[str, ...]) -> object:
+    if isinstance(value, dict):
+        return {
+            _strip_prefix_from_key(key, prefixes): _strip_prefixes(
+                val,
+                prefixes,
+            )
+            for key, val in value.items()
+        }
+    if isinstance(value, list):
+        return [_strip_prefixes(item, prefixes) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_strip_prefixes(item, prefixes) for item in value)
+    return value
+
+
 def strip_prefixes_from_keys(event_dict: EventDict) -> EventDict:
     """Strip display prefixes from keys for cleaner output.
 
     Removes prefixes like _verbose_, _debug_, _perf_, _security_ from keys
     so they display cleanly in the output.
+
+    Applies recursively for nested dictionaries and sequences, ensuring
+    that deeply nested context also has prefixes removed.
 
     Args:
         event_dict: Dictionary with potentially prefixed keys
@@ -65,17 +94,5 @@ def strip_prefixes_from_keys(event_dict: EventDict) -> EventDict:
         >>> strip_prefixes_from_keys({"_verbose_source": "file.py", "count": 42})
         {"source": "file.py", "count": 42}
     """
-    display_prefixes = DEFAULT_PREFIXES
-
-    cleaned_dict = {}
-    for key, value in event_dict.items():
-        clean_key = key
-        # Remove any matching prefix
-        for prefix in display_prefixes:
-            if key.startswith(prefix):
-                clean_key = key.removeprefix(prefix)
-                break
-
-        cleaned_dict[clean_key] = value
-
-    return cleaned_dict
+    prefixes = tuple(DEFAULT_PREFIXES)
+    return cast('EventDict', _strip_prefixes(event_dict, prefixes))

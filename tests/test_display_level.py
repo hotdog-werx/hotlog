@@ -1,4 +1,5 @@
 import pytest
+import yaml
 
 from hotlog import configure_logging, get_logger, maybe_live_logging
 from hotlog.live import LiveLogger
@@ -51,6 +52,91 @@ def test_display_level_not_in_output(capsys: pytest.CaptureFixture):
 
     assert 'context-check' in captured.out
     assert 'display_level' not in captured.out
+
+
+@pytest.mark.parametrize('verbosity', [1, 2])
+@pytest.mark.parametrize(
+    ('context_key', 'expected_key'),
+    [
+        ('_verbose_my_key', 'my_key'),
+        ('_verbose__hidden', '_hidden'),
+    ],
+)
+def test_verbose_prefix_stripped(
+    capsys: pytest.CaptureFixture,
+    verbosity: int,
+    context_key: str,
+    expected_key: str,
+):
+    """_verbose_ prefixes should be removed when rendered."""
+    configure_logging(verbosity=verbosity)
+    capsys.readouterr()
+    logger = get_logger(__name__)
+
+    logger.info('verbose-context', **{context_key: 'value'})
+    captured = capsys.readouterr().out
+
+    assert 'verbose-context' in captured
+
+    context_lines = [line[2:] for line in captured.splitlines()[1:] if line.startswith('  ')]
+    context_yaml = '\n'.join(context_lines)
+    context = yaml.safe_load(context_yaml) if context_yaml else {}
+
+    assert expected_key in context
+    assert context[expected_key] == 'value'
+    assert all(not key.startswith('_verbose') for key in context)
+
+
+@pytest.mark.parametrize('verbosity', [1, 2])
+def test_verbose_prefix_stripped_nested(
+    capsys: pytest.CaptureFixture,
+    verbosity: int,
+):
+    """Nested dictionaries should also have prefixes removed."""
+    configure_logging(verbosity=verbosity)
+    capsys.readouterr()
+    logger = get_logger(__name__)
+
+    logger.info(
+        'nested-context',
+        context_summary={
+            '_verbose_cli_type': 'pkglink',
+            '_verbose_options': {
+                '_verbose_dry_run': False,
+                'display_name': 'hotdog-werx/codeguide',
+            },
+            'source_type': 'github',
+        },
+    )
+    captured = capsys.readouterr().out
+
+    assert 'nested-context' in captured
+
+    context_lines = [line[2:] for line in captured.splitlines()[1:] if line.startswith('  ')]
+    context_yaml = '\n'.join(context_lines)
+    context = yaml.safe_load(context_yaml) if context_yaml else {}
+
+    summary = context.get('context_summary', {})
+    assert summary.get('cli_type') == 'pkglink'
+    options = summary.get('options', {})
+    assert options.get('dry_run') is False
+    assert options.get('display_name') == 'hotdog-werx/codeguide'
+    assert all('_verbose' not in key for key in summary)
+    assert all('_verbose' not in key for key in options)
+
+
+def test_debug_prefix_stripped_in_debug_mode(capsys: pytest.CaptureFixture):
+    """_debug_ prefixes should be removed when verbosity is 2."""
+    configure_logging(verbosity=2)
+    capsys.readouterr()
+    logger = get_logger(__name__)
+
+    logger.info('debug-context', _debug_state='ready')
+    captured = capsys.readouterr().out
+
+    assert 'debug-context' in captured
+    assert '_debug_state' not in captured
+    assert 'state: ready' in captured
 
 
 def test_maybe_live_logging_respects_verbosity():

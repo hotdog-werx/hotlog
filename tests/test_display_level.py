@@ -53,6 +53,35 @@ def test_display_level_not_in_output(capsys: pytest.CaptureFixture):
     assert 'display_level' not in captured.out
 
 
+@pytest.mark.parametrize('verbosity', [1, 2])
+def test_verbose_prefix_stripped(capsys: pytest.CaptureFixture, verbosity: int):
+    """_verbose_ prefixes should be removed when rendered."""
+    configure_logging(verbosity=verbosity)
+    capsys.readouterr()
+    logger = get_logger(__name__)
+
+    logger.info('verbose-context', _verbose_my_key='value')
+    captured = capsys.readouterr().out
+
+    assert 'verbose-context' in captured
+    assert '_verbose_my_key' not in captured
+    assert 'my_key:' in captured
+
+
+def test_debug_prefix_stripped_in_debug_mode(capsys: pytest.CaptureFixture):
+    """_debug_ prefixes should be removed when verbosity is 2."""
+    configure_logging(verbosity=2)
+    capsys.readouterr()
+    logger = get_logger(__name__)
+
+    logger.info('debug-context', _debug_state='ready')
+    captured = capsys.readouterr().out
+
+    assert 'debug-context' in captured
+    assert '_debug_state' not in captured
+    assert 'state: ready' in captured
+
+
 def test_maybe_live_logging_respects_verbosity():
     """maybe_live_logging yields LiveLogger only at verbosity 0."""
     configure_logging(verbosity=0)

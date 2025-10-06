@@ -12,6 +12,6 @@ starship = "1.23.0"
 
 [hooks]
 postinstall = [
-  "uvx pkglink github:hotdog-werx/codeguide@topic/updates",
+  "uvx pkglink github:hotdog-werx/codeguide",
   "poe setup-hook",
 ]

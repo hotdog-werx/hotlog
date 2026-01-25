@@ -69,4 +69,4 @@ def get_console() -> Console:
     using the current sys.stdout, not a cached version. We don't force
     terminal mode but ensure output is not suppressed.
     """
-    return Console(file=sys.stdout, force_jupyter=False)
+    return Console(file=sys.stdout, force_jupyter=False, force_terminal=True)

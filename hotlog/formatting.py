@@ -20,10 +20,13 @@ def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
     """
     if not event_dict:
         return ''
+    # Disable line wrapping - let terminals handle long lines
+    # PyYAML's default width=80 adds unwanted continuation markers
     context_yaml = yaml.safe_dump(
         event_dict,
         sort_keys=True,
         default_flow_style=False,
+        width=float('inf'),
     )
     pad = ' ' * indent
     return '\n'.join(f'{pad}{line}' for line in context_yaml.splitlines())

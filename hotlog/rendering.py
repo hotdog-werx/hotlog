@@ -99,7 +99,7 @@ def render_output(log_msg: str, context_yaml: str) -> None:
         context_yaml: Formatted context YAML
     """
     console = get_console()
-    console.print(log_msg)
+    console.print(log_msg, soft_wrap=True)
 
     if context_yaml:
         syntax = Syntax(
@@ -109,7 +109,7 @@ def render_output(log_msg: str, context_yaml: str) -> None:
             background_color='default',
             line_numbers=False,
         )
-        console.print(syntax)
+        console.print(syntax, soft_wrap=True)
 
 
 def cli_renderer(

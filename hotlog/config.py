@@ -1,11 +1,14 @@
 """Configuration and state management for hotlog."""
 
+import os
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.live import Live
+
+from hotlog.verbosity import is_env_var_true
 
 if TYPE_CHECKING:
     from hotlog.matchers import LogMatcher
@@ -66,7 +69,26 @@ def get_console() -> Console:
     """Get a Console instance that writes to the current sys.stdout.
 
     This ensures compatibility with pytest's output capturing by always
-    using the current sys.stdout, not a cached version. We don't force
-    terminal mode but ensure output is not suppressed.
+    using the current sys.stdout, not a cached version. We force terminal
+    mode for CI color output, but disable it during tests to ensure
+    live logging works properly in captured output.
+
+    The behavior can be overridden with HOTLOG_FORCE_TERMINAL env var:
+    - HOTLOG_FORCE_TERMINAL=1 or true: Always force terminal mode
+    - HOTLOG_FORCE_TERMINAL=0 or false: Never force terminal mode
+    - Not set: Auto-detect (disable in tests, enable otherwise)
     """
-    return Console(file=sys.stdout, force_jupyter=False, force_terminal=True)
+    # Check for explicit user override first
+    if 'HOTLOG_FORCE_TERMINAL' in os.environ:
+        force_terminal = is_env_var_true('HOTLOG_FORCE_TERMINAL')
+    else:
+        # Auto-detect: disable during tests, enable otherwise
+        force_terminal = True
+        if 'pytest' in sys.modules or any(key.startswith('PYTEST_') for key in os.environ):
+            force_terminal = False
+
+    return Console(
+        file=sys.stdout,
+        force_jupyter=False,
+        force_terminal=force_terminal,
+    )

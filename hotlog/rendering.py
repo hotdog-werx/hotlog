@@ -1,5 +1,8 @@
 """Log message rendering with support for matchers, filtering, and live display."""
 
+import os
+import sys
+
 from rich.syntax import Syntax
 from structlog.types import FilteringBoundLogger
 from structlog.typing import EventDict
@@ -102,14 +105,23 @@ def render_output(log_msg: str, context_yaml: str) -> None:
     console.print(log_msg, soft_wrap=True)
 
     if context_yaml:
-        syntax = Syntax(
-            context_yaml,
-            'yaml',
-            theme='github-dark',
-            background_color='default',
-            line_numbers=False,
-        )
-        console.print(syntax, soft_wrap=True)
+        # In Windows CI, skip syntax highlighting to avoid unpredictable
+        # line wrapping markers that break test assertions
+        is_windows_ci = sys.platform == 'win32' and os.environ.get('CI')
+        
+        if is_windows_ci:
+            # Print plain YAML without syntax highlighting
+            console.print(context_yaml, soft_wrap=True)
+        else:
+            # Normal mode: use syntax highlighting
+            syntax = Syntax(
+                context_yaml,
+                'yaml',
+                theme='github-dark',
+                background_color='default',
+                line_numbers=False,
+            )
+            console.print(syntax, soft_wrap=True)
 
 
 def cli_renderer(

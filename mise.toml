@@ -9,10 +9,11 @@ GITHUB_REPO = "{{ env.GITHUB_REPO_OWNER }}/{{ env.GITHUB_REPO_NAME }}"
 GIT_CLIFF_CONFIG = "./.pkglink/.codeguide/configs/cliff.toml"
 
 [tasks]
-pkglink.run = "uvx pkglink sync"
+pkglink.run = "mise exec -- pkglink sync"
+setup-hook.run = "mise exec -- poe setup-hook"
 
 [hooks]
-postinstall = ["mise run pkglink", "poe setup-hook"]
+postinstall = ["mise run pkglink", "mise run setup-hook"]
 
 [tools]
 uv = "0.7.20"

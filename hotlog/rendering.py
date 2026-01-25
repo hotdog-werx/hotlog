@@ -107,7 +107,15 @@ def render_output(log_msg: str, context_yaml: str) -> None:
     if context_yaml:
         # In Windows CI, skip syntax highlighting to avoid unpredictable
         # line wrapping markers that break test assertions
-        is_windows_ci = sys.platform == 'win32' and os.environ.get('CI')
+        # Check for common CI environment variables
+        is_ci = any([
+            os.environ.get('CI'),
+            os.environ.get('GITHUB_ACTIONS'),
+            os.environ.get('GITLAB_CI'),
+            os.environ.get('CIRCLECI'),
+            os.environ.get('TRAVIS'),
+        ])
+        is_windows_ci = sys.platform == 'win32' and is_ci
         
         if is_windows_ci:
             # Print plain YAML without syntax highlighting

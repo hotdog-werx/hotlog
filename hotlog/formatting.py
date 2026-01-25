@@ -1,5 +1,8 @@
 """Message and context formatting utilities."""
 
+import os
+import sys
+
 import yaml
 from structlog.typing import EventDict
 
@@ -20,10 +23,23 @@ def format_context_yaml(event_dict: EventDict, indent: int = 2) -> str:
     """
     if not event_dict:
         return ''
+    
+    # In Windows CI, disable YAML line wrapping to avoid continuation markers
+    is_ci = any([
+        os.environ.get('CI'),
+        os.environ.get('GITHUB_ACTIONS'),
+        os.environ.get('GITLAB_CI'),
+        os.environ.get('CIRCLECI'),
+        os.environ.get('TRAVIS'),
+    ])
+    is_windows_ci = sys.platform == 'win32' and is_ci
+    yaml_width = float('inf') if is_windows_ci else 80
+    
     context_yaml = yaml.safe_dump(
         event_dict,
         sort_keys=True,
         default_flow_style=False,
+        width=yaml_width,
     )
     pad = ' ' * indent
     return '\n'.join(f'{pad}{line}' for line in context_yaml.splitlines())

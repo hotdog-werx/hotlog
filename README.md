@@ -309,6 +309,7 @@ Controls whether Rich's terminal formatting is forced, even in non-interactive
 environments.
 
 **Values:**
+
 - `1`, `true`, `yes`, `on`, `y`, `t` (case-insensitive): Force terminal mode
 - `0`, `false`, `no` (or any other value): Disable forced terminal mode
 - Not set: Auto-detect (enabled in CI/normal use, disabled during tests)
@@ -317,8 +318,8 @@ environments.
 
 - **CI/CD pipelines**: Some CI systems don't auto-detect as terminals. Set
   `HOTLOG_FORCE_TERMINAL=1` to ensure colored output in CI logs.
-- **Disable colors**: Set `HOTLOG_FORCE_TERMINAL=0` when redirecting to files
-  or when colors interfere with log processing tools.
+- **Disable colors**: Set `HOTLOG_FORCE_TERMINAL=0` when redirecting to files or
+  when colors interfere with log processing tools.
 - **Debugging**: Temporarily disable to see raw output without ANSI codes.
 - **Library integration**: Downstream users can control formatting without code
   changes.

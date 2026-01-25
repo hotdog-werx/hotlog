@@ -93,6 +93,27 @@ def configure_logging(
     root_logger = logging.getLogger()
     root_logger.handlers = []  # Clear existing handlers
     root_logger.setLevel(logging.DEBUG if verbosity >= 2 else logging.INFO)
+    
+    # Log Windows CI detection status for debugging test failures
+    import os
+    import sys
+    is_ci = any([
+        os.environ.get('CI'),
+        os.environ.get('GITHUB_ACTIONS'),
+        os.environ.get('GITLAB_CI'),
+        os.environ.get('CIRCLECI'),
+        os.environ.get('TRAVIS'),
+    ])
+    is_windows_ci = sys.platform == 'win32' and is_ci
+    
+    logger = get_logger('hotlog')
+    logger.info(
+        'hotlog_initialized',
+        platform=sys.platform,
+        is_ci=is_ci,
+        is_windows_ci=is_windows_ci,
+        verbosity=verbosity,
+    )
 
 
 # Public API

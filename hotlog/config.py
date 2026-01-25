@@ -66,7 +66,8 @@ def get_console() -> Console:
     """Get a Console instance that writes to the current sys.stdout.
 
     This ensures compatibility with pytest's output capturing by always
-    using the current sys.stdout, not a cached version. We don't force
-    terminal mode but ensure output is not suppressed.
+    using the current sys.stdout, not a cached version.
+
+    force_terminal=True enables colors in CI environments.
     """
-    return Console(file=sys.stdout, force_jupyter=False)
+    return Console(file=sys.stdout, force_jupyter=False, force_terminal=True)

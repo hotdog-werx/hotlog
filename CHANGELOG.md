@@ -8,6 +8,16 @@ This changelog is automatically generated using
 
 View [unreleased changes][unreleased] since the last release.
 
+## [0.1.2] <a name="0.1.2" href="#0.1.2">-</a> January 25, 2026
+
+### ⚙️ Miscellaneous Tasks
+
+- Apply repolish to project (#5) by
+  [@jmlopez-rod](https://github.com/jmlopez-rod) in
+  [#5](https://github.com/hotdog-werx/hotlog/pull/5)
+
+[0.1.2]: https://github.com/hotdog-werx/hotlog/compare/0.1.1...0.1.2
+
 ## [0.0.1] <a name="0.0.1" href="#0.0.1">-</a> October 02, 2025
 
 [0.0.1]: https://github.com/hotdog-werx/hotlog/tree/0.0.1

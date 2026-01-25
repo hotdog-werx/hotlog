@@ -301,6 +301,42 @@ configure_logging(verbosity=min(args.verbose, 2))
 logger = get_logger(__name__)
 ```
 
+## Environment Variables
+
+### `HOTLOG_FORCE_TERMINAL`
+
+Controls whether Rich's terminal formatting is forced, even in non-interactive
+environments.
+
+**Values:**
+
+- `1`, `true`, `yes`, `on`, `y`, `t` (case-insensitive): Force terminal mode
+- `0`, `false`, `no` (or any other value): Disable forced terminal mode
+- Not set: Auto-detect (enabled in CI/normal use, disabled during tests)
+
+**When to use:**
+
+- **CI/CD pipelines**: Some CI systems don't auto-detect as terminals. Set
+  `HOTLOG_FORCE_TERMINAL=1` to ensure colored output in CI logs.
+- **Disable colors**: Set `HOTLOG_FORCE_TERMINAL=0` when redirecting to files or
+  when colors interfere with log processing tools.
+- **Debugging**: Temporarily disable to see raw output without ANSI codes.
+- **Library integration**: Downstream users can control formatting without code
+  changes.
+
+**Example:**
+
+```bash
+# Force colors in CI
+HOTLOG_FORCE_TERMINAL=1 python my_script.py
+
+# Disable colors for file output
+HOTLOG_FORCE_TERMINAL=0 python my_script.py > output.log
+```
+
+**Note:** During test execution (pytest), force_terminal is automatically
+disabled to ensure live logging works correctly with captured output.
+
 ## Installation
 
 ```bash

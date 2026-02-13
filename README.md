@@ -312,7 +312,8 @@ logger = get_logger(__name__)
 ### Typer Integration
 
 Hotlog works seamlessly with [Typer](https://typer.tiangolo.com/) for modern CLI
-apps:
+apps. **Note:** Typer is an optional dependency - install with
+`pip install hotlog[typer]`.
 
 ```python
 import typer
@@ -393,9 +394,16 @@ disabled to ensure live logging works correctly with captured output.
 ## Installation
 
 ```bash
-# Install dependencies (adjust based on your package manager)
-pip install structlog rich pyyaml
+# Core dependencies (required)
+pip install hotlog
+
+# With Typer support (optional)
+pip install hotlog[typer]
 ```
+
+**Note:** Typer is optional and only needed if you want to use the
+`verbosity_option` for Typer-based CLI apps. The core hotlog functionality works
+without Typer.
 
 ## Why hotlog?
 

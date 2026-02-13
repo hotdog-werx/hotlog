@@ -13,11 +13,12 @@ from hotlog.verbosity import (
 )
 
 try:
-    from hotlog.verbosity_typer import add_verbosity_option
+    from hotlog.verbosity_typer import verbosity_option
 
     TYPER_AVAILABLE = True
 except ImportError:
     TYPER_AVAILABLE = False
+    verbosity_option = None
 
     def add_verbosity_option():
         """Stub function for testing when typer is not available."""
@@ -258,8 +259,8 @@ def test_cli_and_env_combined_takes_max(
 
 @pytest.mark.skipif(not TYPER_AVAILABLE, reason='typer not available')
 def test_add_verbosity_option() -> None:
-    """Test that add_verbosity_option creates a proper Typer option."""
-    option = add_verbosity_option()
+    """Test that verbosity_option is a proper Typer option."""
+    option = verbosity_option
     # When typer is not available, this returns None
     if option is None:
         pytest.skip('typer not available')
@@ -269,8 +270,8 @@ def test_add_verbosity_option() -> None:
     assert hasattr(option, 'default')
     assert option.default == 0
     assert hasattr(option, 'param_decls')
-    assert '-v' in option.param_decls  # type: ignore[operator]
-    assert '--verbose' in option.param_decls  # type: ignore[operator]
+    assert '-v' in option.param_decls
+    assert '--verbose' in option.param_decls
 
 
 @pytest.mark.skipif(not TYPER_AVAILABLE, reason='typer not available')

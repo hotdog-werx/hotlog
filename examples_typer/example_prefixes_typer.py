@@ -21,8 +21,8 @@ from hotlog import (
     configure_logging,
     get_logger,
     resolve_verbosity,
+    verbosity_option,
 )
-from hotlog.verbosity_typer import add_verbosity_option
 
 app = typer.Typer(
     help='Prefix filtering examples using hotlog with Typer',
@@ -36,7 +36,7 @@ Examples:
 
 
 @app.command()
-def main(verbose: int = add_verbosity_option()) -> None:  # type: ignore[assignment]
+def main(verbose: int = verbosity_option) -> None:
     """Run the prefix filtering example."""
     verbosity = resolve_verbosity(verbose=verbose)
 

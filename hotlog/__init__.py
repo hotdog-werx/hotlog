@@ -8,7 +8,7 @@ Provides three levels of verbosity:
 Usage:
     from hotlog import (
         add_verbosity_argument,  # For argparse
-        add_verbosity_option,    # For Typer
+        verbosity_option,        # For Typer
         configure_logging,
         get_logger,
         resolve_verbosity,
@@ -23,7 +23,7 @@ Usage:
 
     # With Typer
     @app.command()
-    def my_command(verbose: int = add_verbosity_option()):
+    def my_command(verbose: int = verbosity_option):
         configure_logging(verbosity=resolve_verbosity(verbose=verbose))
 
     configure_logging(
@@ -48,9 +48,9 @@ from hotlog.matchers import LogMatcher, ToolMatch
 from hotlog.rendering import cli_renderer
 from hotlog.verbosity import (
     add_verbosity_argument,
-    add_verbosity_option,
     get_verbosity_from_env,
     resolve_verbosity,
+    verbosity_option,
 )
 
 # Type alias for backward compatibility
@@ -110,7 +110,6 @@ __all__ = [
     'Logger',
     'ToolMatch',
     'add_verbosity_argument',
-    'add_verbosity_option',
     'configure_logging',
     'get_logger',
     'get_verbosity_from_env',
@@ -118,4 +117,5 @@ __all__ = [
     'live_logging',
     'maybe_live_logging',
     'resolve_verbosity',
+    'verbosity_option',
 ]

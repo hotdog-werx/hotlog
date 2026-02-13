@@ -316,12 +316,12 @@ apps:
 
 ```python
 import typer
-from hotlog import add_verbosity_option, configure_logging, get_logger, resolve_verbosity
+from hotlog import verbosity_option, configure_logging, get_logger, resolve_verbosity
 
 app = typer.Typer()
 
 @app.command()
-def my_command(verbose: int = add_verbosity_option()):
+def my_command(verbose: int = verbosity_option):
     # Resolve verbosity from CLI args and environment (CI detection)
     verbosity = resolve_verbosity(verbose=verbose)
     configure_logging(verbosity=verbosity)
@@ -333,7 +333,7 @@ def my_command(verbose: int = add_verbosity_option()):
 
 **Key functions:**
 
-- `add_verbosity_option()`: Creates a Typer option for `-v`/`--verbose` flags
+- `verbosity_option`: Pre-configured Typer option for `-v`/`--verbose` flags
 - `resolve_verbosity(verbose=count)`: Resolves final verbosity level from CLI
   and environment
 - All hotlog features work: live logging, prefixes, matchers, highlighting

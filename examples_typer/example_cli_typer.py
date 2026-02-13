@@ -21,8 +21,8 @@ from hotlog import (
     get_logger,
     live_logging,
     resolve_verbosity,
+    verbosity_option,
 )
-from hotlog.verbosity_typer import add_verbosity_option
 
 
 # Helper to make sleep time configurable (useful for tests)
@@ -122,7 +122,7 @@ Examples:
 @app.command()
 def install(
     package: str = typer.Argument(..., help='Package name to install'),
-    verbose: int = add_verbosity_option(),  # type: ignore[assignment]
+    verbose: int = verbosity_option,
 ) -> None:
     """Install a package."""
     # Resolve verbosity from CLI args and environment (CI detection)
@@ -146,7 +146,7 @@ def install(
 @app.command()
 def update(
     package: str = typer.Argument(..., help='Package name to update'),
-    verbose: int = add_verbosity_option(),  # type: ignore[assignment]
+    verbose: int = verbosity_option,
 ) -> None:
     """Update a package."""
     # Resolve verbosity from CLI args and environment (CI detection)
@@ -170,7 +170,7 @@ def update(
 @app.command()
 def remove(
     package: str = typer.Argument(..., help='Package name to remove'),
-    verbose: int = add_verbosity_option(),  # type: ignore[assignment]
+    verbose: int = verbosity_option,
 ) -> None:
     """Remove a package."""
     # Resolve verbosity from CLI args and environment (CI detection)

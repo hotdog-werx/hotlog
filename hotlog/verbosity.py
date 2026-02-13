@@ -2,22 +2,20 @@
 
 import argparse
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
 
 try:
-    from hotlog.verbosity_typer import add_verbosity_option
+    from hotlog.verbosity_typer import verbosity_option
 
     TYPER_AVAILABLE = True
 except ImportError:
     TYPER_AVAILABLE = False
 
-    def add_verbosity_option() -> object:
-        """Stub function when typer is not available."""
-        msg = 'typer is required for add_verbosity_option.'
-        raise ImportError(msg)
+    # Stub when typer is not available
+    verbosity_option = cast('Any', None)
 
 
 def is_env_var_true(name: str) -> bool:

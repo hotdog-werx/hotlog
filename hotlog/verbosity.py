@@ -130,13 +130,14 @@ def resolve_verbosity(
 ) -> int:
     """Resolve final verbosity level from CLI args, direct verbose count, and environment.
 
+    Direct verbose parameter takes precedence over both args and environment.
     CLI arguments take precedence over environment variables. If both are present,
-    the higher verbosity level is used. Direct verbose parameter takes precedence over args.
+    the higher verbosity level is used.
 
     Args:
         args: Parsed argparse Namespace with optional 'verbose' attribute.
               If None or missing 'verbose', only environment is checked.
-        verbose: Direct verbosity count (0, 1, 2). Takes precedence over args.
+        verbose: Direct verbosity count (0, 1, 2). Takes precedence over args and environment.
 
     Returns:
         Final verbosity level (0, 1, or 2)
@@ -146,17 +147,20 @@ def resolve_verbosity(
         >>> args = argparse.Namespace(verbose=1)
         >>> resolve_verbosity(args)  # Returns 1 or higher if CI detected
         1
-        >>> resolve_verbosity(verbose=2)  # Returns 2
+        >>> resolve_verbosity(verbose=2)  # Returns 2, even in CI
         2
+        >>> resolve_verbosity(verbose=0)  # Returns 0, even in CI
+        0
     """
     env_verbosity = get_verbosity_from_env()
     cli_verbosity = 0
 
     if verbose is not None:
-        cli_verbosity = min(verbose, 2)
-    elif args and hasattr(args, 'verbose'):
+        # Direct verbose parameter takes precedence over environment
+        return min(verbose, 2)
+    if args and hasattr(args, 'verbose'):
         # Cap at level 2
         cli_verbosity = min(args.verbose, 2)
 
-    # Take the maximum of both sources
+    # Take the maximum of environment and CLI args
     return max(env_verbosity, cli_verbosity)

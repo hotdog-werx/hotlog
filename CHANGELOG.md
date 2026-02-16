@@ -8,6 +8,16 @@ This changelog is automatically generated using
 
 View [unreleased changes][unreleased] since the last release.
 
+## [0.2.0] <a name="0.2.0" href="#0.2.0">-</a> February 16, 2026
+
+### 🚀 Features
+
+- Add Typer support for CLI verbosity handling (#11) by
+  [@jmlopez-rod](https://github.com/jmlopez-rod) in
+  [#11](https://github.com/hotdog-werx/hotlog/pull/11)
+
+[0.2.0]: https://github.com/hotdog-werx/hotlog/compare/0.1.3...0.2.0
+
 ## [0.1.3] <a name="0.1.3" href="#0.1.3">-</a> January 25, 2026
 
 ### 🐛 Bug Fixes

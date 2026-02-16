@@ -12,6 +12,18 @@ from hotlog.verbosity import (
     resolve_verbosity,
 )
 
+try:
+    from hotlog.verbosity_typer import verbosity_option
+
+    TYPER_AVAILABLE = True
+except ImportError:
+    TYPER_AVAILABLE = False
+    verbosity_option = None
+
+    def add_verbosity_option():
+        """Stub function for testing when typer is not available."""
+
+
 # All environment variables that could affect verbosity detection
 ALL_VERBOSITY_ENV_VARS = [
     'HOTLOG_VERBOSITY',
@@ -243,3 +255,38 @@ def test_cli_and_env_combined_takes_max(
     monkeypatch.setenv('RUNNER_DEBUG', '1')  # Now env gives 2
     args = parser.parse_args(['-v'])
     assert resolve_verbosity(args) == 2
+
+
+@pytest.mark.skipif(not TYPER_AVAILABLE, reason='typer not available')
+def test_add_verbosity_option() -> None:
+    """Test that verbosity_option is a proper Typer option."""
+    option = verbosity_option
+    # When typer is not available, this returns None
+    if option is None:
+        pytest.skip('typer not available')
+
+    # We can't easily test the full Typer integration without a Typer app,
+    # but we can test that it returns a Typer Option with correct defaults
+    assert hasattr(option, 'default')
+    assert option.default == 0
+    assert hasattr(option, 'param_decls')
+    assert '-v' in option.param_decls
+    assert '--verbose' in option.param_decls
+
+
+@pytest.mark.skipif(not TYPER_AVAILABLE, reason='typer not available')
+@pytest.mark.parametrize(
+    ('verbose', 'expected_verbosity'),
+    [
+        (0, 0),
+        (1, 1),
+        (2, 2),
+        (3, 2),  # Capped at 2
+    ],
+)
+def test_resolve_verbosity_with_direct_verbose(
+    verbose: int,
+    expected_verbosity: int,
+) -> None:
+    """Test resolve_verbosity with direct verbose parameter."""
+    assert resolve_verbosity(verbose=verbose) == expected_verbosity

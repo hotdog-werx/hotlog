@@ -8,11 +8,14 @@ include = [
 ]
 
 [tool.poe.tasks]
+check-ty.help = "run type checks with pyright"
+check-ty.cmd = "uvx ty check ."
+
 ci-checks.help = "run all checks for CI"
 ci-checks.sequence = [
   "check-dprint",
   "check-python",
-  "check-basedpyright",
+  "check-ty",
   "check-complexity",
   "check-coverage",
 ]

@@ -2,10 +2,20 @@
 
 import argparse
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
+
+try:
+    from hotlog.verbosity_typer import verbosity_option
+
+    TYPER_AVAILABLE = True
+except ImportError:
+    TYPER_AVAILABLE = False
+
+    # Stub when typer is not available
+    verbosity_option = cast('Any', None)
 
 
 def is_env_var_true(name: str) -> bool:
@@ -112,15 +122,20 @@ def get_verbosity_from_env() -> int:
     return 0
 
 
-def resolve_verbosity(args: argparse.Namespace | None = None) -> int:
-    """Resolve final verbosity level from CLI args and environment.
+def resolve_verbosity(
+    args: argparse.Namespace | None = None,
+    verbose: int | None = None,
+) -> int:
+    """Resolve final verbosity level from CLI args, direct verbose count, and environment.
 
+    Direct verbose parameter takes precedence over both args and environment.
     CLI arguments take precedence over environment variables. If both are present,
     the higher verbosity level is used.
 
     Args:
         args: Parsed argparse Namespace with optional 'verbose' attribute.
               If None or missing 'verbose', only environment is checked.
+        verbose: Direct verbosity count (0, 1, 2). Takes precedence over args and environment.
 
     Returns:
         Final verbosity level (0, 1, or 2)
@@ -130,13 +145,20 @@ def resolve_verbosity(args: argparse.Namespace | None = None) -> int:
         >>> args = argparse.Namespace(verbose=1)
         >>> resolve_verbosity(args)  # Returns 1 or higher if CI detected
         1
+        >>> resolve_verbosity(verbose=2)  # Returns 2, even in CI
+        2
+        >>> resolve_verbosity(verbose=0)  # Returns 0, even in CI
+        0
     """
     env_verbosity = get_verbosity_from_env()
     cli_verbosity = 0
 
+    if verbose is not None:
+        # Direct verbose parameter takes precedence over environment
+        return min(verbose, 2)
     if args and hasattr(args, 'verbose'):
         # Cap at level 2
         cli_verbosity = min(args.verbose, 2)
 
-    # Take the maximum of both sources
+    # Take the maximum of environment and CLI args
     return max(env_verbosity, cli_verbosity)

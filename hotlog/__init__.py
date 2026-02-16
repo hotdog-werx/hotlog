@@ -7,17 +7,24 @@ Provides three levels of verbosity:
 
 Usage:
     from hotlog import (
-        add_verbosity_argument,
+        add_verbosity_argument,  # For argparse
+        verbosity_option,        # For Typer
         configure_logging,
         get_logger,
         resolve_verbosity,
         ToolMatch,
     )
 
-    # In your CLI
+    # With argparse
     parser = argparse.ArgumentParser()
     add_verbosity_argument(parser)
     args = parser.parse_args()
+    configure_logging(verbosity=resolve_verbosity(args))
+
+    # With Typer
+    @app.command()
+    def my_command(verbose: int = verbosity_option):
+        configure_logging(verbosity=resolve_verbosity(verbose=verbose))
 
     configure_logging(
         verbosity=resolve_verbosity(args),
@@ -43,6 +50,7 @@ from hotlog.verbosity import (
     add_verbosity_argument,
     get_verbosity_from_env,
     resolve_verbosity,
+    verbosity_option,
 )
 
 # Type alias for backward compatibility
@@ -109,4 +117,5 @@ __all__ = [
     'live_logging',
     'maybe_live_logging',
     'resolve_verbosity',
+    'verbosity_option',
 ]

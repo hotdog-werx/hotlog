@@ -62,7 +62,7 @@ def _strip_prefix_from_key(raw_key: str, prefixes: tuple[str, ...]) -> str:
 def _strip_prefixes(value: object, prefixes: tuple[str, ...]) -> object:
     if isinstance(value, dict):
         return {
-            _strip_prefix_from_key(key, prefixes): _strip_prefixes(
+            _strip_prefix_from_key(str(key), prefixes): _strip_prefixes(
                 val,
                 prefixes,
             )

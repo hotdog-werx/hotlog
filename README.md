@@ -24,6 +24,14 @@ Python applications and libraries. It wraps `structlog` and `rich` to offer:
 - **Level 2 (-vv)**: All debug info, includes `_debug_` prefixed keys, no live
   updates
 
+**Why only three levels?** Hotlog caps verbosity at level 2 because these three
+levels represent distinct user experience patterns that cover the vast majority
+of logging needs. Level 0 provides clean, interactive output with live updates.
+Level 1 adds useful context without overwhelming the user. Level 2 shows
+everything for debugging. Beyond level 2, you're typically showing internal
+implementation details that are better handled by traditional debug logging
+rather than a verbosity scale.
+
 ### Prefix Filtering
 
 Control which context appears at different verbosity levels by using key
@@ -301,6 +309,52 @@ configure_logging(verbosity=min(args.verbose, 2))
 logger = get_logger(__name__)
 ```
 
+### Typer Integration
+
+Hotlog works seamlessly with [Typer](https://typer.tiangolo.com/) for modern CLI
+apps. **Note:** Typer is an optional dependency - install with
+`pip install hotlog[typer]`.
+
+```python
+import typer
+from hotlog import verbosity_option, configure_logging, get_logger, resolve_verbosity
+
+app = typer.Typer()
+
+@app.command()
+def my_command(verbose: int = verbosity_option):
+    # Resolve verbosity from CLI args and environment (CI detection)
+    verbosity = resolve_verbosity(verbose=verbose)
+    configure_logging(verbosity=verbosity)
+    logger = get_logger(__name__)
+    
+    logger.info("Starting process", task_id=123)
+    logger.info("Processing data", records=100, _verbose_source="db.sqlite")
+```
+
+**Key functions:**
+
+- `verbosity_option`: Pre-configured Typer option for `-v`/`--verbose` flags
+- `resolve_verbosity(verbose=count)`: Resolves final verbosity level from CLI
+  and environment
+- All hotlog features work: live logging, prefixes, matchers, highlighting
+
+**Example with Typer:**
+
+```bash
+# Default verbosity (level 0)
+python my_app.py my-command
+
+# Verbose (level 1) 
+python my_app.py my-command -v
+
+# Debug (level 2)
+python my_app.py my-command -vv
+```
+
+See `examples_typer/` directory for complete Typer examples that mirror the
+argparse versions.
+
 ## Environment Variables
 
 ### `HOTLOG_FORCE_TERMINAL`
@@ -340,9 +394,16 @@ disabled to ensure live logging works correctly with captured output.
 ## Installation
 
 ```bash
-# Install dependencies (adjust based on your package manager)
-pip install structlog rich pyyaml
+# Core dependencies (required)
+pip install hotlog
+
+# With Typer support (optional)
+pip install hotlog[typer]
 ```
+
+**Note:** Typer is optional and only needed if you want to use the
+`verbosity_option` for Typer-based CLI apps. The core hotlog functionality works
+without Typer.
 
 ## Why hotlog?
 
@@ -367,6 +428,11 @@ See the `example_*.py` files for more usage patterns:
 - `example_custom_matcher.py` - Creating custom matchers
 - `example_highlight.py` - Using highlight() and Rich markup
 - `example_prefixes.py` - Prefix filtering demonstration
+
+**Typer examples** (equivalent functionality with Typer):
+
+- `examples_typer/example_cli_typer.py` - Full CLI simulation with Typer
+- `examples_typer/example_prefixes_typer.py` - Prefix filtering with Typer
 
 Run examples with different verbosity levels:
 

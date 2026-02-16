@@ -43,4 +43,4 @@ View [unreleased changes][unreleased] since the last release.
 ## [0.0.1] <a name="0.0.1" href="#0.0.1">-</a> October 02, 2025
 
 [0.0.1]: https://github.com/hotdog-werx/hotlog/tree/0.0.1
-[unreleased]: https://github.com/hotdog-werx/hotlog/compare/0.1.3...HEAD
+[unreleased]: https://github.com/hotdog-werx/hotlog/compare/0.2.0...HEAD
